@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>dev.wfj</groupId>
+  <artifactId>gwt-pdfbox-io</artifactId>
+  <version>0.1</version>
+  <packaging>gwt-lib</packaging>
+  <name>Gwt PdfBox IO</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>com.google.elemental2</groupId>
+      <artifactId>elemental2-dom</artifactId>
+      <version>1.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.treblereel.gwt.nio</groupId>
+      <artifactId>gwt-nio</artifactId>
+      <version>1.1</version>
+    </dependency>
+
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>net.ltgt.gwt.maven</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <version>1.0.1</version>
+        <extensions>true</extensions>
+        <configuration>
+          <moduleName>dev.wfj.gwtpdfbox.io.GwPdfBoxIo</moduleName>
+          <skipModule>true</skipModule>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
