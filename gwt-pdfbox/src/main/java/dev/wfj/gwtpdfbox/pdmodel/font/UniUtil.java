@@ -28,7 +28,7 @@ final class UniUtil
     {
     }
 
-    // faster than String.format("uni%04X", codePoint)
+    // faster than "uni%04X", codePoint)
     static String getUniNameOfCodePoint(int codePoint)
     {
         String hex = Integer.toString(codePoint, 16).toUpperCase(Locale.US);

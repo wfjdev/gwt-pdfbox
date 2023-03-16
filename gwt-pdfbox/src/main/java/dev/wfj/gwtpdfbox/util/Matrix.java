@@ -438,10 +438,9 @@ public final class Matrix implements Cloneable
      * Clones this object.
      * @return cloned matrix as an object.
      */
-    @Override
     public Matrix clone()
     {
-        return new Matrix(single.clone());
+        return new Matrix(Arrays.copyOf(single, single.length));
     }
 
     /**

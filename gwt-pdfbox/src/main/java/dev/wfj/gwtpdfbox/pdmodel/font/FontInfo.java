@@ -17,7 +17,7 @@
 
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
-import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
+import org.apache.fontbox.FontBoxFont;
 
 /**
  * Information about a font on the system.

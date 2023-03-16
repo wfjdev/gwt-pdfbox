@@ -16,6 +16,8 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel.graphics.state;
 
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFont;
+
 /**
  * This class will hold the current state of the text parameters when executing a
  * content stream.
@@ -28,11 +30,26 @@ public class PDTextState implements Cloneable
     private float wordSpacing = 0;
     private float horizontalScaling = 100;
     private float leading = 0;
-    //private PDFont font;
+    private PDFont font;
     private float fontSize;
     private RenderingMode renderingMode = RenderingMode.FILL;
     private float rise = 0;
     private boolean knockout = true;
+
+    public PDTextState() {
+    }
+
+    public PDTextState(PDTextState other) {
+        characterSpacing = other.characterSpacing;
+        wordSpacing = other.wordSpacing;
+        horizontalScaling = other.horizontalScaling;
+        leading = other.leading;
+        font = other.font;
+        fontSize = other.fontSize;
+        renderingMode = other.renderingMode;
+        rise = other.rise;
+        knockout = other.knockout;
+    }
 
     /**
      * Get the value of the characterSpacing.
@@ -121,20 +138,20 @@ public class PDTextState implements Cloneable
      *
      * @return The font.
      */
-    /*public PDFont getFont()
+    public PDFont getFont()
     {
         return font;
-    }*/
+    }
 
     /**
      * Set the value of the font.
      *
      * @param value The font.
      */
-    /*public void setFont(PDFont value)
+    public void setFont(PDFont value)
     {
         font = value;
-    }*/
+    }
 
     /**
      * Get the value of the fontSize.
@@ -216,16 +233,8 @@ public class PDTextState implements Cloneable
         knockout = value;
     }
 
-    /*public PDTextState clone()
+    public PDTextState clone()
     {
-        try
-        {
-            return (PDTextState)super.clone();
-        }
-        catch (CloneNotSupportedException e)
-        {
-            // should not happen
-            throw new RuntimeException(e);
-        }
-    }*/
+            return new PDTextState(this);
+    }
 }

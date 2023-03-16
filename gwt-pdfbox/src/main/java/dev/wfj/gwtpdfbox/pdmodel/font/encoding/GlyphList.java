@@ -16,7 +16,7 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel.font.encoding;
 
-import java.io.BufferedReader;
+//import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
@@ -35,15 +35,15 @@ import elemental2.dom.DomGlobal;
 public final class GlyphList
 {
     // Adobe Glyph List (AGL)
-    private static final GlyphList DEFAULT = load("glyphlist.txt", 4281);
+    private static final GlyphList DEFAULT = null;// = load("glyphlist.txt", 4281);
     
     // Zapf Dingbats has its own glyph list
-    private static final GlyphList ZAPF_DINGBATS = load("zapfdingbats.txt",201);
+    private static final GlyphList ZAPF_DINGBATS = null;//= load("zapfdingbats.txt",201);
     
     /**
      * Loads a glyph list from disk.
      */
-    private static GlyphList load(String filename, int numberOfEntries)
+    /* private static GlyphList load(String filename, int numberOfEntries)
     {
         String path = "/dev.wfj.gwtpdfbox/resources/glyphlist/" + filename;
         //no need to use a BufferedInputSteam here, as GlyphList uses a BufferedReader
@@ -59,7 +59,7 @@ public final class GlyphList
         {
             throw new RuntimeException(e);
         }
-    }
+    } */
 
     /**
      * Returns the Adobe Glyph List (AGL).
@@ -114,7 +114,8 @@ public final class GlyphList
 
     private void loadList(InputStream input) throws IOException
     {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(input, StandardCharsets.ISO_8859_1)))
+        DomGlobal.console.warn("Todo: loadList");
+        /*try (BufferedReader in = new BufferedReader(new InputStreamReader(input, StandardCharsets.ISO_8859_1)))
         {
             while (in.ready())
             {
@@ -162,7 +163,7 @@ public final class GlyphList
                     }
                 }
             }
-        }
+        }*/
     }
 
     /**

@@ -15,34 +15,166 @@
  * limitations under the License.
  */
 
-package dev.wfj.gwtpdfbox.pdmodel;
+ package dev.wfj.gwtpdfbox.pdmodel;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import dev.wfj.gwtpdfbox.cos.COSObject;
-import dev.wfj.gwtpdfbox.pdmodel.graphics.PDXObject;
-
-/**
- * A resource cached based on SoftReference, retains resources until memory pressure causes them
- * to be garbage collected.
- *
- * @author John Hewson
- */
-public class DefaultResourceCache implements ResourceCache
-{ 
-    private final Map<COSObject, PDXObject> xobjects =
-            new HashMap<>();
-
-    @Override
-    public PDXObject getXObject(COSObject indirect) throws IOException
-    {
-        return xobjects.get(indirect);
-    }
-
-    @Override
-    public void put(COSObject indirect, PDXObject xobject) throws IOException
-    {
-        xobjects.put(indirect, xobject);
-    }
-}
+ import java.io.IOException;
+ //import java.lang.ref.SoftReference;
+ import java.util.HashMap;
+ import java.util.Map;
+ import dev.wfj.gwtpdfbox.cos.COSObject;
+ import dev.wfj.gwtpdfbox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
+ import dev.wfj.gwtpdfbox.pdmodel.font.PDFont;
+ import dev.wfj.gwtpdfbox.pdmodel.graphics.PDXObject;
+ import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDColorSpace;
+ import dev.wfj.gwtpdfbox.pdmodel.graphics.pattern.PDAbstractPattern;
+ import dev.wfj.gwtpdfbox.pdmodel.graphics.state.PDExtendedGraphicsState;
+ 
+ /**
+  * A resource cached based on SoftReference, retains resources until memory pressure causes them
+  * to be garbage collected.
+  *
+  * @author John Hewson
+  */
+ public class DefaultResourceCache implements ResourceCache
+ {
+     private final Map<COSObject, PDFont> fonts =
+             new HashMap<>();
+     
+     private final Map<COSObject, PDColorSpace> colorSpaces =
+             new HashMap<>();
+ 
+     private final Map<COSObject, PDXObject> xobjects =
+             new HashMap<>();
+ 
+     private final Map<COSObject, PDExtendedGraphicsState> extGStates =
+             new HashMap<>();
+ 
+     //private final Map<COSObject, PDShading> shadings =
+     //        new HashMap<>();
+ 
+     private final Map<COSObject, PDAbstractPattern> patterns =
+             new HashMap<>();
+ 
+     private final Map<COSObject, PDPropertyList> properties =
+             new HashMap<>();
+ 
+     @Override
+     public PDFont getFont(COSObject indirect) throws IOException
+     {
+         PDFont font = fonts.get(indirect);
+         if (font != null)
+         {
+             return font;
+         }
+         return null;
+     }
+ 
+     @Override
+     public void put(COSObject indirect, PDFont font) throws IOException
+     {
+         fonts.put(indirect, font);
+     }
+ 
+     @Override
+     public PDColorSpace getColorSpace(COSObject indirect) throws IOException
+     {
+         PDColorSpace colorSpace = colorSpaces.get(indirect);
+         if (colorSpace != null)
+         {
+             return colorSpace;
+         }
+         return null;
+     }
+ 
+     @Override
+     public void put(COSObject indirect, PDColorSpace colorSpace) throws IOException
+     {
+         colorSpaces.put(indirect, colorSpace);
+     }
+ 
+     @Override
+     public PDExtendedGraphicsState getExtGState(COSObject indirect)
+     {
+         PDExtendedGraphicsState extGState = extGStates.get(indirect);
+         if (extGState != null)
+         {
+             return extGState;
+         }
+         return null;
+     }
+ 
+     @Override
+     public void put(COSObject indirect, PDExtendedGraphicsState extGState)
+     {
+         extGStates.put(indirect, extGState);
+     }
+ 
+     /*@Override
+     public PDShading getShading(COSObject indirect) throws IOException
+     {
+         PDShading> shading = shadings.get(indirect);
+         if (shading != null)
+         {
+             return shading;
+         }
+         return null;
+     }*/
+ 
+     /*@Override
+     public void put(COSObject indirect, PDShading shading) throws IOException
+     {
+         shadings.put(indirect, shading));
+     }*/
+ 
+     @Override
+     public PDAbstractPattern getPattern(COSObject indirect) throws IOException
+     {
+         PDAbstractPattern pattern = patterns.get(indirect);
+         if (pattern != null)
+         {
+             return pattern;
+         }
+         return null;
+     }
+ 
+     @Override
+     public void put(COSObject indirect, PDAbstractPattern pattern) throws IOException
+     {
+         patterns.put(indirect, pattern);
+     }
+     
+     @Override
+     public PDPropertyList getProperties(COSObject indirect)
+     {
+         PDPropertyList propertyList = properties.get(indirect);
+         if (propertyList != null)
+         {
+             return propertyList;
+         }
+         return null;
+     }
+ 
+     @Override
+     public void put(COSObject indirect, PDPropertyList propertyList)
+     {
+         properties.put(indirect, propertyList);
+     }
+ 
+     @Override
+     public PDXObject getXObject(COSObject indirect) throws IOException
+     {
+        PDXObject xobject = xobjects.get(indirect);
+         if (xobject != null)
+         {
+             return xobject;
+         }
+         return null;
+     }
+ 
+     @Override
+     public void put(COSObject indirect, PDXObject xobject) throws IOException
+     {
+         xobjects.put(indirect, xobject);
+     }
+ }
+ 

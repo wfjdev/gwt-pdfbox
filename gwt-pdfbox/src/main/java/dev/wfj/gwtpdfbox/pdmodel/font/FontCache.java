@@ -17,10 +17,10 @@
 
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
-import java.lang.ref.SoftReference;
+//import java.lang.ref.SoftReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
+import org.apache.fontbox.FontBoxFont;
 
 /**
  * An in-memory cache for system fonts. This allows PDFBox to manage caching for a {@link FontProvider}.
@@ -30,14 +30,14 @@ import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
  */
 public final class FontCache
 {
-    private final Map<FontInfo, SoftReference<FontBoxFont>> cache = new ConcurrentHashMap<>();
+    private final Map<FontInfo, FontBoxFont> cache = new ConcurrentHashMap<>();
 
     /**
      * Adds the given FontBox font to the cache.
      */
     public void addFont(FontInfo info, FontBoxFont font)
     {
-        cache.put(info, new SoftReference<>(font));
+        cache.put(info, font);
     }
 
     /**
@@ -45,7 +45,7 @@ public final class FontCache
      */
     public FontBoxFont getFont(FontInfo info)
     {
-        SoftReference<FontBoxFont> reference = cache.get(info);
-        return reference != null ? reference.get() : null;
+        FontBoxFont reference = cache.get(info);
+        return reference != null ? reference : null;
     }
 }

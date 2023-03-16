@@ -18,16 +18,26 @@ package dev.wfj.gwtpdfbox.text;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.HashMap;
 
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.contentstream.PDFStreamEngine;
 import dev.wfj.gwtpdfbox.pdmodel.PDPage;
+import dev.wfj.gwtpdfbox.pdmodel.font.encoding.GlyphList;
 import dev.wfj.gwtpdfbox.pdmodel.common.PDRectangle;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDCIDFont;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDCIDFontType2;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFont;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDSimpleFont;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDTrueTypeFont;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDType0Font;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDType3Font;
 import dev.wfj.gwtpdfbox.pdmodel.graphics.state.PDGraphicsState;
 import dev.wfj.gwtpdfbox.util.Matrix;
 import dev.wfj.gwtpdfbox.util.Vector;
+import elemental2.dom.DomGlobal;
 import dev.wfj.gwtpdfbox.contentstream.operator.DrawObject;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.Concatenate;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.Restore;
@@ -51,6 +61,7 @@ import dev.wfj.gwtpdfbox.contentstream.operator.text.SetTextRise;
 import dev.wfj.gwtpdfbox.contentstream.operator.text.SetWordSpacing;
 import dev.wfj.gwtpdfbox.contentstream.operator.text.ShowText;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFontDescriptor;
 
 /**
  * LEGACY text calculations which are known to be incorrect but are depended on by PDFTextStripper.
@@ -64,7 +75,6 @@ import dev.wfj.gwtpdfbox.cos.COSDictionary;
  */
 class LegacyPDFStreamEngine extends PDFStreamEngine
 {
-
     private int pageRotation;
     private PDRectangle pageSize;
     private Matrix translateMatrix;
@@ -74,7 +84,7 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
     /*static
     {
         // load additional glyph list for Unicode mapping
-        String path = "/dev.wfj.gwtfontbox/resources/glyphlist/additional.txt";
+        String path = "/org/apache/pdfbox/resources/glyphlist/additional.txt";
         //no need to use a BufferedInputSteam here, as GlyphList uses a BufferedReader
         try (InputStream input = GlyphList.class.getResourceAsStream(path))
         {
@@ -143,7 +153,7 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
      * Called when a glyph is to be processed. The heuristic calculations here were originally
      * written by Ben Litchfield for PDFStreamEngine.
      */
-    /*@Override
+    @Override
     protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, Vector displacement)
             throws IOException
     {
@@ -259,7 +269,7 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
         float spaceWidthDisplay = spaceWidthText * textRenderingMatrix.getScalingFactorX();
 
         // use our additional glyph list for Unicode mapping
-        String unicode = font.toUnicode(code, GLYPHLIST);
+        String unicode = new String(new char[] { (char) code });//font.toUnicode(code, null);//GLYPHLIST);
 
         // when there is no Unicode mapping available, Acrobat simply coerces the character code
         // into Unicode, so we do the same. Subclasses of PDFStreamEngine don't necessarily want
@@ -297,7 +307,7 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
                 Math.abs(dyDisplay), dxDisplay,
                 Math.abs(spaceWidthDisplay), unicode, new int[] { code } , font, fontSize,
                 (int)(fontSize * textMatrix.getScalingFactorX())));
-    }*/
+    }
 
     /**
      * Compute the font height. Override this if you want to use own calculations.
@@ -307,7 +317,7 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
      * 
      * @throws IOException if there is an error while getting the font bounding box.
      */
-    /*protected float computeFontHeight(PDFont font) throws IOException
+    protected float computeFontHeight(PDFont font) throws IOException
     {
         BoundingBox bbox = font.getBoundingBox();
         if (bbox.getLowerLeftY() < Short.MIN_VALUE)
@@ -352,7 +362,7 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
         }
 
         return height;
-    }*/
+    }
 
     /**
      * A method provided as an event interface to allow a subclass to perform some specific

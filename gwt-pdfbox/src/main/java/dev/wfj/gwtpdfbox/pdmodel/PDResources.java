@@ -17,7 +17,9 @@
 package dev.wfj.gwtpdfbox.pdmodel;
 
 import java.io.IOException;
+//import java.lang.ref.SoftReference;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import dev.wfj.gwtpdfbox.cos.COSBase;
@@ -26,6 +28,13 @@ import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.cos.COSObject;
 import dev.wfj.gwtpdfbox.cos.COSStream;
 import dev.wfj.gwtpdfbox.pdmodel.common.COSObjectable;
+import dev.wfj.gwtpdfbox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFont;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFontFactory;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.optionalcontent.PDOptionalContentGroup;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.state.PDExtendedGraphicsState;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDColorSpace;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.pattern.PDAbstractPattern;
 import dev.wfj.gwtpdfbox.pdmodel.graphics.PDXObject;
 
 /**
@@ -39,6 +48,11 @@ public final class PDResources implements COSObjectable
     private final COSDictionary resources;
     private final ResourceCache cache;
     
+    // PDFBOX-3442 cache fonts that are not indirect objects, as these aren't cached in ResourceCache
+    // and this would result in huge memory footprint in text extraction
+    private final Map <COSName,PDFont> directFontCache = 
+            new HashMap<>();
+
     /**
      * Constructor for embedding.
      */
@@ -87,6 +101,108 @@ public final class PDResources implements COSObjectable
     {
         return resources;
     }
+
+    /**
+     * Returns the font resource with the given name, or null if none exists.
+     *
+     * @param name Name of the font resource.
+     * @throws IOException if something went wrong.
+     */
+    public PDFont getFont(COSName name) throws IOException
+    {
+        COSObject indirect = getIndirect(COSName.FONT, name);
+        if (cache != null && indirect != null)
+        {
+            PDFont cached = cache.getFont(indirect);
+            if (cached != null)
+            {
+                return cached;
+            }
+        }
+        else if (indirect == null)
+        {
+            PDFont ref = directFontCache.get(name);
+            if (ref != null)
+            {
+                PDFont cached = ref;
+                if (cached != null)
+                {
+                    return cached;
+                }
+            }
+        }
+
+        PDFont font = null;
+        COSBase base = get(COSName.FONT, name);
+        if (base instanceof COSDictionary)
+        {
+            font = PDFontFactory.createFont((COSDictionary) base, cache);
+        }
+        
+        if (cache != null && indirect != null)
+        {
+            cache.put(indirect, font);
+        }
+        else if (indirect == null)
+        {
+            directFontCache.put(name, font);
+        }
+        return font;
+    }
+
+    /**
+     * Returns the color space resource with the given name, or null if none exists.
+     * 
+     * @param name Name of the color space resource.
+     * @return a new color space.
+     * @throws IOException if something went wrong.
+     */
+    public PDColorSpace getColorSpace(COSName name) throws IOException
+    {
+        return getColorSpace(name, false);
+    }
+    
+    /**
+     * Returns the color space resource with the given name, or null if none exists. This method is
+     * for PDFBox internal use only, others should use {@link #getColorSpace(COSName)}.
+     *
+     * @param name Name of the color space resource.
+     * @param wasDefault if current color space was used by a default color space. This parameter is
+     * to
+     * @return a new color space.
+     * @throws IOException if something went wrong.
+     */
+    public PDColorSpace getColorSpace(COSName name, boolean wasDefault) throws IOException
+    {
+        COSObject indirect = getIndirect(COSName.COLORSPACE, name);
+        if (cache != null && indirect != null)
+        {
+            PDColorSpace cached = cache.getColorSpace(indirect);
+            if (cached != null)
+            {
+                return cached;
+            }
+        }
+
+        // get the instance
+        PDColorSpace colorSpace;
+        COSBase object = get(COSName.COLORSPACE, name);
+        if (object != null)
+        {
+            colorSpace = PDColorSpace.create(object, this, wasDefault);
+        }
+        else
+        {
+            colorSpace = PDColorSpace.create(name, this, wasDefault);
+        }
+
+        // we can't cache PDPattern, because it holds page resources, see PDFBOX-2370
+        /*if (cache != null && indirect != null && !(colorSpace instanceof PDPattern))
+        {
+            cache.put(indirect, colorSpace);
+        }*/
+        return colorSpace;
+    }
     
     /**
      * Returns true if the given color space name exists in these resources.
@@ -96,6 +212,137 @@ public final class PDResources implements COSObjectable
     public boolean hasColorSpace(COSName name)
     {
         return get(COSName.COLORSPACE, name) != null;
+    }
+
+    /**
+     * Returns the extended graphics state resource with the given name, or null
+     * if none exists.
+     *
+     * @param name Name of the graphics state resource.
+     */
+    public PDExtendedGraphicsState getExtGState(COSName name)
+    {
+        COSObject indirect = getIndirect(COSName.EXT_G_STATE, name);
+        if (cache != null && indirect != null)
+        {
+            PDExtendedGraphicsState cached = cache.getExtGState(indirect);
+            if (cached != null)
+            {
+                return cached;
+            }
+        }
+
+        // get the instance
+        PDExtendedGraphicsState extGState = null;
+        COSBase base = get(COSName.EXT_G_STATE, name);
+        if (base instanceof COSDictionary)
+        {
+            extGState = new PDExtendedGraphicsState((COSDictionary) base);
+        }
+
+        if (cache != null && indirect != null)
+        {
+            cache.put(indirect, extGState);
+        }
+        return extGState;
+    }
+
+    /**
+     * Returns the shading resource with the given name, or null if none exists.
+     *
+     * @param name Name of the shading resource.
+     * @throws IOException if something went wrong.
+     */
+    /*public PDShading getShading(COSName name) throws IOException
+    {
+        COSObject indirect = getIndirect(COSName.SHADING, name);
+        if (cache != null && indirect != null)
+        {
+            PDShading cached = cache.getShading(indirect);
+            if (cached != null)
+            {
+                return cached;
+            }
+        }
+
+        // get the instance
+        PDShading shading = null;
+        COSBase base = get(COSName.SHADING, name);
+        if (base instanceof COSDictionary)
+        {
+            shading = PDShading.create((COSDictionary) base);
+        }
+        
+        if (cache != null && indirect != null)
+        {
+            cache.put(indirect, shading);
+        }
+        return shading;
+    }*/
+
+    /**
+     * Returns the pattern resource with the given name, or null if none exists.
+     * 
+     * @param name Name of the pattern resource.
+     * @throws IOException if something went wrong.
+     */
+    public PDAbstractPattern getPattern(COSName name) throws IOException
+    {
+        COSObject indirect = getIndirect(COSName.PATTERN, name);
+        if (cache != null && indirect != null)
+        {
+            PDAbstractPattern cached = cache.getPattern(indirect);
+            if (cached != null)
+            {
+                return cached;
+            }
+        }
+
+        // get the instance
+        PDAbstractPattern pattern = null;
+        COSBase base = get(COSName.PATTERN, name);
+        if (base instanceof COSDictionary)
+        {
+            pattern = PDAbstractPattern.create((COSDictionary) base, getResourceCache());
+        }
+
+        if (cache != null && indirect != null)
+        {
+            cache.put(indirect, pattern);
+        }
+        return pattern;
+    }
+
+    /**
+     * Returns the property list resource with the given name, or null if none exists.
+     * 
+     * @param name Name of the property list resource.
+     */
+    public PDPropertyList getProperties(COSName name)
+    {
+        COSObject indirect = getIndirect(COSName.PROPERTIES, name);
+        if (cache != null && indirect != null)
+        {
+            PDPropertyList cached = cache.getProperties(indirect);
+            if (cached != null)
+            {
+                return cached;
+            }
+        }
+
+        // get the instance
+        PDPropertyList propertyList = null;
+        COSBase base = get(COSName.PROPERTIES, name);
+        if (base instanceof COSDictionary)
+        {
+            propertyList = PDPropertyList.create((COSDictionary) base);
+        }
+
+        if (cache != null && indirect != null)
+        {
+            cache.put(indirect, propertyList);
+        }
+        return propertyList;
     }
 
     /**
@@ -166,6 +413,30 @@ public final class PDResources implements COSObjectable
 
     private boolean isAllowedCache(PDXObject xobject)
     {
+        /*if (xobject instanceof PDImageXObject)
+        {
+            COSName colorSpaceName = xobject.getCOSObject().getCOSName(COSName.COLORSPACE);
+            if (colorSpaceName != null)
+            {
+                // don't cache if it might use page resources, see PDFBOX-2370 and PDFBOX-3484
+                if (colorSpaceName.equals(COSName.DEVICECMYK) && hasColorSpace(COSName.DEFAULT_CMYK))
+                {
+                    return false;
+                }
+                if (colorSpaceName.equals(COSName.DEVICERGB) && hasColorSpace(COSName.DEFAULT_RGB))
+                {
+                    return false;
+                }
+                if (colorSpaceName.equals(COSName.DEVICEGRAY) && hasColorSpace(COSName.DEFAULT_GRAY))
+                {
+                    return false;
+                }
+                if (hasColorSpace(colorSpaceName))
+                {
+                    return false;
+                }
+            }
+        }*/
         return true;
     }
 
@@ -263,6 +534,109 @@ public final class PDResources implements COSObjectable
     }
 
     /**
+     * Adds the given font to the resources of the current page and returns the name for the
+     * new resources. Returns the existing resource name if the given item already exists.
+     *
+     * @param font the font to add
+     * @return the name of the resource in the resources dictionary
+     */
+    public COSName add(PDFont font)
+    {
+        return add(COSName.FONT, "F", font);
+    }
+
+    /**
+     * Adds the given color space to the resources of the current page and returns the name for the
+     * new resources. Returns the existing resource name if the given item already exists.
+     *
+     * @param colorSpace the color space to add
+     * @return the name of the resource in the resources dictionary
+     */
+    public COSName add(PDColorSpace colorSpace)
+    {
+        return add(COSName.COLORSPACE, "cs", colorSpace);
+    }
+
+    /**
+     * Adds the given extended graphics state to the resources of the current page and returns the
+     * name for the new resources. Returns the existing resource name if the given item already exists.
+     *
+     * @param extGState the extended graphics state to add
+     * @return the name of the resource in the resources dictionary
+     */
+    public COSName add(PDExtendedGraphicsState extGState)
+    {
+        return add(COSName.EXT_G_STATE, "gs", extGState);
+    }
+
+    /**
+     * Adds the given shading to the resources of the current page and returns the name for the
+     * new resources. Returns the existing resource name if the given item already exists.
+     *
+     * @param shading the shading to add
+     * @return the name of the resource in the resources dictionary
+     */
+    /*public COSName add(PDShading shading)
+    {
+        return add(COSName.SHADING, "sh", shading);
+    }*/
+
+    /**
+     * Adds the given pattern to the resources of the current page and returns the name for the
+     * new resources. Returns the existing resource name if the given item already exists.
+     *
+     * @param pattern the pattern to add
+     * @return the name of the resource in the resources dictionary
+     */
+    public COSName add(PDAbstractPattern pattern)
+    {
+        return add(COSName.PATTERN, "p", pattern);
+    }
+
+    /**
+     * Adds the given property list to the resources of the current page and returns the name for
+     * the new resources. Returns the existing resource name if the given item already exists.
+     *
+     * @param properties the property list to add
+     * @return the name of the resource in the resources dictionary
+     */
+    public COSName add(PDPropertyList properties)
+    {
+        if (properties instanceof PDOptionalContentGroup)
+        {
+            return add(COSName.PROPERTIES, "oc", properties);
+        }
+        else
+        {
+            return add(COSName.PROPERTIES, "Prop", properties);
+        }
+    }
+
+    /**
+     * Adds the given image to the resources of the current page and returns the name for the
+     * new resources. Returns the existing resource name if the given item already exists.
+     *
+     * @param image the image to add
+     * @return the name of the resource in the resources dictionary
+     */
+    /*public COSName add(PDImageXObject image)
+    {
+        return add(COSName.XOBJECT, "Im", image);
+    }*/
+
+    /**
+     * Adds the given form to the resources of the current page and returns the name for the
+     * new resources. Returns the existing resource name if the given item already exists.
+     *
+     * @param form the form to add
+     * @return the name of the resource in the resources dictionary
+     */
+    /*public COSName add(PDFormXObject form)
+    {
+        return add(COSName.XOBJECT, "Form", form);
+    }*/
+
+    /**
      * Adds the given XObject to the resources of the current page and returns the name for the
      * new resources. Returns the existing resource name if the given item already exists.
      *
@@ -342,6 +716,72 @@ public final class PDResources implements COSObjectable
             resources.setItem(kind, dict);
         }
         dict.setItem(name, object);
+    }
+
+    /**
+     * Sets the font resource with the given name.
+     *
+     * @param name the name of the resource
+     * @param font the font to be added
+     */
+    public void put(COSName name, PDFont font)
+    {
+        put(COSName.FONT, name, font);
+    }
+
+    /**
+     * Sets the color space resource with the given name.
+     *
+     * @param name the name of the resource
+     * @param colorSpace the color space to be added
+     */
+    public void put(COSName name, PDColorSpace colorSpace)
+    {
+        put(COSName.COLORSPACE, name, colorSpace);
+    }
+
+    /**
+     * Sets the extended graphics state resource with the given name.
+     *
+     * @param name the name of the resource
+     * @param extGState the extended graphics state to be added
+     */
+    public void put(COSName name, PDExtendedGraphicsState extGState)
+    {
+        put(COSName.EXT_G_STATE, name, extGState);
+    }
+
+    /**
+     * Sets the shading resource with the given name.
+     *
+     * @param name the name of the resource
+     * @param shading the shading to be added
+     */
+    /*public void put(COSName name, PDShading shading)
+    {
+        put(COSName.SHADING, name, shading);
+    }*/
+
+    /**
+     * Sets the pattern resource with the given name.
+     *
+     * @param name the name of the resource
+     * @param pattern the pattern to be added
+     */
+    public void put(COSName name, PDAbstractPattern pattern)
+    {
+        put(COSName.PATTERN, name, pattern);
+    }
+
+    /**
+     * Sets the property list resource with the given name.
+     *
+     * @param name the name of the resource
+     * @param properties the property list to be added
+     */
+    public void put(COSName name, PDPropertyList properties)
+    {
+        put(COSName.PROPERTIES, name, properties);
     }
 
     /**

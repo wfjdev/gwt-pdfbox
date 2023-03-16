@@ -17,19 +17,19 @@
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
 import java.awt.geom.GeneralPath;
-import java.io.File;
+//import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import dev.wfj.gwtpdfbox.fontbox.cmap.CMap;
-import dev.wfj.gwtpdfbox.fontbox.ttf.CmapLookup;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TTFParser;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
-import dev.wfj.gwtpdfbox.fontbox.ttf.model.GsubData;
-import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
+import org.apache.fontbox.cmap.CMap;
+import org.apache.fontbox.ttf.CmapLookup;
+import org.apache.fontbox.ttf.TTFParser;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.ttf.model.GsubData;
+import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
@@ -323,7 +323,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
         {
             // predefined CMap
             COSName encodingName = (COSName) encoding;
-            cMap = CMapManager.getPredefinedCMap(encodingName.getName());
+            //cMap = CMapManager.getPredefinedCMap(encodingName.getName());
             isCMapPredefined = true;
         }
         else if (encoding != null)
@@ -388,7 +388,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
             }
             
             // try to find the corresponding Unicode (UC2) CMap
-            if (strName != null)
+            /*if (strName != null)
             {
                 try
                 {
@@ -400,7 +400,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
                 {
                     DomGlobal.console.warn("Could not get " + strName + " UC2 map for font " + getName(), ex);
                 }
-            }
+            }*/
         }
     }
 

@@ -16,12 +16,17 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel.common;
 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 import java.util.Arrays;
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSFloat;
 import dev.wfj.gwtpdfbox.cos.COSNumber;
-import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
+
+import org.apache.fontbox.util.BoundingBox;
+
+import dev.wfj.gwtpdfbox.util.Matrix;
 
 /**
  * A rectangle in a PDF document.
@@ -287,6 +292,30 @@ public class PDRectangle implements COSObjectable
         return getUpperRightY() - getLowerLeftY();
     }
 
+    /**
+     * Returns a path which represents this rectangle having been transformed by the given matrix.
+     * Note that the resulting path need not be rectangular.
+     */
+    public GeneralPath transform(Matrix matrix)
+    {
+        float x1 = getLowerLeftX();
+        float y1 = getLowerLeftY();
+        float x2 = getUpperRightX();
+        float y2 = getUpperRightY();
+
+        Point2D.Float p0 = matrix.transformPoint(x1, y1);
+        Point2D.Float p1 = matrix.transformPoint(x2, y1);
+        Point2D.Float p2 = matrix.transformPoint(x2, y2);
+        Point2D.Float p3 = matrix.transformPoint(x1, y2);
+
+        GeneralPath path = new GeneralPath();
+        path.moveTo(p0.getX(), p0.getY());
+        path.lineTo(p1.getX(), p1.getY());
+        path.lineTo(p2.getX(), p2.getY());
+        path.lineTo(p3.getX(), p3.getY());
+        path.closePath();
+        return path;
+    }
 
     /**
      * Convert this standard java object to a COS object.
@@ -298,6 +327,26 @@ public class PDRectangle implements COSObjectable
     {
         return rectArray;
     }
+
+    /**
+     * Returns a general path equivalent to this rectangle. This method avoids the problems
+     * caused by Rectangle2D not working well with -ve rectangles.
+     */
+    public GeneralPath toGeneralPath()
+    {
+        float x1 = getLowerLeftX();
+        float y1 = getLowerLeftY();
+        float x2 = getUpperRightX();
+        float y2 = getUpperRightY();
+        GeneralPath path = new GeneralPath();
+        path.moveTo(x1, y1);
+        path.lineTo(x2, y1);
+        path.lineTo(x2, y2);
+        path.lineTo(x1, y2);
+        path.closePath();
+        return path;
+    }
+
     /**
      * This will return a string representation of this rectangle.
      *

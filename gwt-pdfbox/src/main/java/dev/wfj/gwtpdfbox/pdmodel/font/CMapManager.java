@@ -16,8 +16,8 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
-import dev.wfj.gwtpdfbox.fontbox.cmap.CMap;
-import dev.wfj.gwtpdfbox.fontbox.cmap.CMapParser;
+import org.apache.fontbox.cmap.CMap;
+import org.apache.fontbox.cmap.CMapParser;
 import dev.wfj.gwtpdfbox.io.RandomAccessRead;
 
 import java.io.IOException;
@@ -43,7 +43,7 @@ final class CMapManager
      * @return The predefined CMap, never null.
      * @throws IOException 
      */
-    public static CMap getPredefinedCMap(String cMapName) throws IOException
+    /* public static CMap getPredefinedCMap(String cMapName) throws IOException
     {
         CMap cmap = CMAP_CACHE.get(cMapName);
         if (cmap != null)
@@ -56,7 +56,7 @@ final class CMapManager
         // limit the cache to predefined CMaps
         CMAP_CACHE.put(targetCmap.getName(), targetCmap);
         return targetCmap;
-    }
+    } */
 
     /**
      * Parse the given CMap.

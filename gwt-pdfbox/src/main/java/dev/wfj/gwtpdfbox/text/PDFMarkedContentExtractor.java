@@ -213,13 +213,13 @@ public class PDFMarkedContentExtractor extends LegacyPDFStreamEngine
                 TextPosition previousTextPosition = textList.get(textList.size()-1);
                 if(text.isDiacritic() && previousTextPosition.contains(text))
                 {
-                    previousTextPosition.mergeDiacritic(text);
+                    //previousTextPosition.mergeDiacritic(text);
                 }
                 /* If the previous TextPosition was the diacritic, merge it into this
                  * one and remove it from the list. */
                 else if(previousTextPosition.isDiacritic() && text.contains(previousTextPosition))
                 {
-                    text.mergeDiacritic(previousTextPosition);
+                    //text.mergeDiacritic(previousTextPosition);
                     textList.remove(textList.size()-1);
                     textList.add(text);
                 }

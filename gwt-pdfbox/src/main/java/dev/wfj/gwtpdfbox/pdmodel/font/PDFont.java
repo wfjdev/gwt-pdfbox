@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import dev.wfj.gwtpdfbox.fontbox.afm.FontMetrics;
-import dev.wfj.gwtpdfbox.fontbox.cmap.CMap;
+import org.apache.fontbox.afm.FontMetrics;
+import org.apache.fontbox.cmap.CMap;
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
@@ -152,7 +152,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
                         || COSName.IDENTITY_V.equals(encoding))
                 {
                     // assume that if encoding is identity, then the reverse is also true
-                    cmap = CMapManager.getPredefinedCMap(COSName.IDENTITY_H.getName());
+                    //cmap = CMapManager.getPredefinedCMap(COSName.IDENTITY_H.getName());
                     DomGlobal.console.warn("Using predefined identity CMap instead");
                 }
             }
@@ -196,13 +196,13 @@ public abstract class PDFont implements COSObjectable, PDFontLike
      */
     protected final CMap readCMap(COSBase base) throws IOException
     {
-        if (base instanceof COSName)
+        /* if (base instanceof COSName)
         {
             // predefined CMap
             String name = ((COSName)base).getName();
             return CMapManager.getPredefinedCMap(name);
         }
-        else if (base instanceof COSStream)
+        else  */if (base instanceof COSStream)
         {
             // embedded CMap
             try (RandomAccessRead input = ((COSStream) base).createView())
@@ -461,23 +461,6 @@ public abstract class PDFont implements COSObjectable, PDFontLike
                 // PDFBOX-3123: do this only if the /ToUnicode entry is a name
                 // PDFBOX-4322: identity streams are OK too
                 return new String(new char[] { (char) code });
-            }
-            else
-            {
-                if (code < 256 && !(this instanceof PDType0Font))
-                {
-                    COSName encoding = dict.getCOSName(COSName.ENCODING);
-                    if (encoding != null && !encoding.getName().startsWith("Identity"))
-                    {
-                        // due to the conversion to an int it is no longer possible to determine
-                        // if the code is based on a one or two byte value. We should consider to
-                        // refactor that part of the code.
-                        // However, simple fonts with a predefined encoding are using one byte codes so that
-                        // we can limit the CMap mappings to one byte codes by passing the origin length
-                        return toUnicodeCMap.toUnicode(code, 1);
-                    }
-                }
-                return toUnicodeCMap.toUnicode(code);
             }
         }
 

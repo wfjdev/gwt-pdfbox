@@ -26,12 +26,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import dev.wfj.gwtpdfbox.fontbox.ttf.GlyphData;
-import dev.wfj.gwtpdfbox.fontbox.ttf.GlyphTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.HorizontalMetricsTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
-import dev.wfj.gwtpdfbox.fontbox.ttf.VerticalHeaderTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.VerticalMetricsTable;
+import org.apache.fontbox.ttf.GlyphData;
+import org.apache.fontbox.ttf.GlyphTable;
+import org.apache.fontbox.ttf.HorizontalMetricsTable;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.ttf.VerticalHeaderTable;
+import org.apache.fontbox.ttf.VerticalMetricsTable;
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSInteger;

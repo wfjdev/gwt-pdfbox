@@ -27,14 +27,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import dev.wfj.gwtpdfbox.fontbox.ttf.CmapLookup;
-import dev.wfj.gwtpdfbox.fontbox.ttf.HeaderTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.HorizontalHeaderTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.OS2WindowsMetricsTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.PostScriptTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TTFParser;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TTFSubsetter;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.ttf.CmapLookup;
+import org.apache.fontbox.ttf.HeaderTable;
+import org.apache.fontbox.ttf.HorizontalHeaderTable;
+import org.apache.fontbox.ttf.OS2WindowsMetricsTable;
+import org.apache.fontbox.ttf.PostScriptTable;
+import org.apache.fontbox.ttf.TTFParser;
+import org.apache.fontbox.ttf.TTFSubsetter;
+import org.apache.fontbox.ttf.TrueTypeFont;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.pdmodel.PDDocument;
@@ -338,11 +338,11 @@ abstract class TrueTypeEmbedder implements Subsetter
         subsetter.setPrefix(tag);
 
         // save the subset font
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        subsetter.writeToStream(out);
+        //ByteArrayOutputStream out = new ByteArrayOutputStream();
+        //subsetter.writeToStream(out);
 
         // re-build the embedded font
-        buildSubset(new ByteArrayInputStream(out.toByteArray()), tag, gidToCid);
+        //buildSubset(new ByteArrayInputStream(out.toByteArray()), tag, gidToCid);
         ttf.close();
     }
 

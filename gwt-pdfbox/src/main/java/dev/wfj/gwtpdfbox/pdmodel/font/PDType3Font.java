@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Objects;
 
 
-import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
-import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;

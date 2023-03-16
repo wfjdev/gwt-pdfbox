@@ -18,19 +18,19 @@ package dev.wfj.gwtpdfbox.pdmodel.font;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
-import java.io.File;
+//import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
-import dev.wfj.gwtpdfbox.fontbox.ttf.CmapSubtable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.CmapTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.GlyphData;
-import dev.wfj.gwtpdfbox.fontbox.ttf.PostScriptTable;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TTFParser;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
-import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.ttf.CmapSubtable;
+import org.apache.fontbox.ttf.CmapTable;
+import org.apache.fontbox.ttf.GlyphData;
+import org.apache.fontbox.ttf.PostScriptTable;
+import org.apache.fontbox.ttf.TTFParser;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.io.IOUtils;
@@ -381,9 +381,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
         {
             if (!encoding.contains(getGlyphList().codePointToName(unicode)))
             {
-                throw new IllegalArgumentException(
-                    String.format("U+%04X is not available in this font's encoding: %s",
-                                  unicode, encoding.getEncodingName()));
+                throw new IllegalArgumentException();//String.format("U+%04X is not available in this font's encoding: %s", unicode, encoding.getEncodingName()));
             }
 
             String name = getGlyphList().codePointToName(unicode);
@@ -395,8 +393,7 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
                 String uniName = getUniNameOfCodePoint(unicode);
                 if (!ttf.hasGlyph(uniName))
                 {
-                    throw new IllegalArgumentException(
-                            String.format("No glyph for U+%04X in font %s", unicode, getName()));
+                    throw new IllegalArgumentException();//String.format("No glyph for U+%04X in font %s", unicode, getName()));
                 }
             }
 
@@ -410,16 +407,14 @@ public class PDTrueTypeFont extends PDSimpleFont implements PDVectorFont
 
             if (!ttf.hasGlyph(name))
             {
-                throw new IllegalArgumentException(
-                    String.format("No glyph for U+%04X in font %s", unicode, getName()));
+                throw new IllegalArgumentException();//String.format("No glyph for U+%04X in font %s", unicode, getName()));
             }
             
             int gid = ttf.nameToGID(name);
             Integer code = getGIDToCode().get(gid);
             if (code == null)
             {
-                throw new IllegalArgumentException(
-                    String.format("U+%04X is not available in this font's Encoding", unicode));
+                throw new IllegalArgumentException();//String.format("U+%04X is not available in this font's Encoding", unicode));
             }
             
             return new byte[] { (byte)(int)code };

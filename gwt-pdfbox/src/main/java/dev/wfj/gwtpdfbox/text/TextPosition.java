@@ -16,12 +16,11 @@
  */
 package dev.wfj.gwtpdfbox.text;
 
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import dev.wfj.gwtpdfbox.text.TextPosition;
-
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFont;
 import dev.wfj.gwtpdfbox.util.Matrix;
 import elemental2.dom.DomGlobal;
 
@@ -52,6 +51,7 @@ public final class TextPosition
     private final float widthOfSpace; // width of a space, in display units
 
     private final int[] charCodes; // internal PDF character codes
+    private final PDFont font;
     private final float fontSize;
     private final int fontSizePt;
 
@@ -80,7 +80,7 @@ public final class TextPosition
      */
     public TextPosition(int pageRotation, float pageWidth, float pageHeight, Matrix textMatrix,
                         float endX, float endY, float maxHeight, float individualWidth,
-                        float spaceWidth, String unicode, int[] charCodes,
+                        float spaceWidth, String unicode, int[] charCodes, PDFont font,
                         float fontSize, int fontSizeInPt)
     {
         this.textMatrix = textMatrix;
@@ -98,6 +98,7 @@ public final class TextPosition
         this.widthOfSpace = spaceWidth;
         this.unicode = unicode;
         this.charCodes = charCodes;
+        this.font = font;
         this.fontSize = fontSize;
         this.fontSizePt = fontSizeInPt;
 
@@ -463,6 +464,16 @@ public final class TextPosition
     }
 
     /**
+     * This will get the font for the text being drawn.
+     *
+     * @return The font size.
+     */
+    public PDFont getFont()
+    {
+        return font;
+    }
+
+    /**
      * This will get the width of a space character. This is useful for some algorithms such as the
      * text stripper, that need to know the width of a space character.
      *
@@ -564,7 +575,7 @@ public final class TextPosition
      *
      * @param diacritic TextPosition to merge into the current TextPosition.
      */
-    public void mergeDiacritic(TextPosition diacritic)
+    /* public void mergeDiacritic(TextPosition diacritic)
     {
         if (diacritic.getUnicode().length() > 1)
         {
@@ -583,7 +594,8 @@ public final class TextPosition
         {
             if (i >= widths.length)
             {
-                DomGlobal.console.info("diacritic " + diacritic.getUnicode() + " on ligature " + unicode +  " is not supported yet and is ignored (PDFBOX-2831)");
+                DomGlobal.console.info("diacritic " + diacritic.getUnicode() + " on ligature " + unicode + 
+                        " is not supported yet and is ignored (PDFBOX-2831)");
                 break;
             }
             float currCharXEnd = currCharXStart + widths[i];
@@ -640,7 +652,7 @@ public final class TextPosition
             // couldn't find anything useful so we go to the next character in the TextPosition
             currCharXStart += widths[i];
         }
-    }
+    } */
 
     /**
      * Inserts the diacritic TextPosition to the str of this TextPosition and updates the widths
@@ -649,7 +661,7 @@ public final class TextPosition
      * @param i current character
      * @param diacritic The diacritic TextPosition
      */
-    private void insertDiacritic(int i, TextPosition diacritic)
+    /* private void insertDiacritic(int i, TextPosition diacritic)
     {
         StringBuilder sb = new StringBuilder();
         sb.append(unicode, 0, i);
@@ -670,7 +682,7 @@ public final class TextPosition
 
         unicode = sb.toString();
         widths = widths2;
-    }
+    } */
 
     /**
      * Combine the diacritic, for example, convert non-combining diacritic characters to their
@@ -679,7 +691,7 @@ public final class TextPosition
      * @param str String to normalize
      * @return Normalized string
      */
-    private String combineDiacritic(String str)
+    /* private String combineDiacritic(String str)
     {
         // Unicode contains special combining forms of the diacritic characters which we want to use
         int codePoint = str.codePointAt(0);
@@ -691,16 +703,17 @@ public final class TextPosition
         }
         else
         {
-            return str;//Normalizer.normalize(str, Normalizer.Form.NFKC).trim();
+            return Normalizer.normalize(str, Normalizer.Form.NFKC).trim();
         }
-    }
+    } */
 
     /**
      * @return True if the current character is a diacritic char.
      */
     public boolean isDiacritic()
     {
-        String text = this.getUnicode();
+        return false;
+        /* String text = this.getUnicode();
         if (text.length() != 1)
         {
             return false;
@@ -713,11 +726,10 @@ public final class TextPosition
             // Ignoring it as diacritic avoids trouble if it slightly overlaps with the next glyph.
             return false;
         }
-        return false;
-        /*int type = Character.getType(text.charAt(0));
+        int type = Character.getType(text.charAt(0));
         return type == Character.NON_SPACING_MARK ||
                type == Character.MODIFIER_SYMBOL ||
-               type == Character.MODIFIER_LETTER;*/
+               type == Character.MODIFIER_LETTER; */
 
   }
 
@@ -853,7 +865,7 @@ public final class TextPosition
         {
             return false;
         }
-        return true;
+        return font != null ? font.equals(that.font) : that.font == null;
         
         // If changing this method, do not compare mutable fields (PDFBOX-4701)        
     }
@@ -872,6 +884,7 @@ public final class TextPosition
         result = 31 * result + Float.floatToIntBits(pageWidth);
         result = 31 * result + Float.floatToIntBits(widthOfSpace);
         result = 31 * result + Arrays.hashCode(charCodes);
+        result = 31 * result + (font != null ? font.hashCode() : 0);
         result = 31 * result + Float.floatToIntBits(fontSize);
         result = 31 * result + fontSizePt;
         return result;

@@ -25,12 +25,12 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import dev.wfj.gwtpdfbox.fontbox.EncodedFont;
-import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
-import dev.wfj.gwtpdfbox.fontbox.cff.CFFFont;
-import dev.wfj.gwtpdfbox.fontbox.cff.CFFParser;
-import dev.wfj.gwtpdfbox.fontbox.cff.CFFType1Font;
-import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
+import org.apache.fontbox.EncodedFont;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.cff.CFFFont;
+import org.apache.fontbox.cff.CFFParser;
+import org.apache.fontbox.cff.CFFType1Font;
+import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.io.RandomAccessRead;
@@ -387,9 +387,7 @@ public class PDType1CFont extends PDSimpleFont implements PDVectorFont
         String name = getGlyphList().codePointToName(unicode);
         if (!encoding.contains(name))
         {
-            throw new IllegalArgumentException(
-                    String.format("U+%04X ('%s') is not available in this font's encoding: %s",
-                                  unicode, name, encoding.getEncodingName()));
+            throw new IllegalArgumentException("U+"+unicode+"X is not available in this font's encoding:"+ encoding.getEncodingName());
         }
 
         String nameInFont = getNameInFont(name);
@@ -398,8 +396,7 @@ public class PDType1CFont extends PDSimpleFont implements PDVectorFont
 
         if (nameInFont.equals(".notdef") || !genericFont.hasGlyph(nameInFont))
         {
-            throw new IllegalArgumentException(
-                    String.format("No glyph for U+%04X in font %s", unicode, getName()));
+            throw new IllegalArgumentException("No glyph for U+%04X in font");
         }
 
         int code = inverted.get(name);

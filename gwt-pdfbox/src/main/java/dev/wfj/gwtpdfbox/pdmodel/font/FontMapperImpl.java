@@ -29,11 +29,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
-import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
-import dev.wfj.gwtpdfbox.fontbox.ttf.OpenTypeFont;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TTFParser;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
-import dev.wfj.gwtpdfbox.fontbox.type1.Type1Font;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.ttf.OpenTypeFont;
+import org.apache.fontbox.ttf.TTFParser;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.type1.Type1Font;
 import dev.wfj.gwtpdfbox.io.RandomAccessReadBuffer;
 import dev.wfj.gwtpdfbox.pdmodel.font.Standard14Fonts.FontName;
 import elemental2.dom.DomGlobal;
@@ -48,7 +48,7 @@ final class FontMapperImpl implements FontMapper
     private static final FontCache fontCache = new FontCache(); // todo: static cache isn't ideal
     private FontProvider fontProvider;
     private Map<String, FontInfo> fontInfoByName;
-    private final TrueTypeFont lastResortFont;
+    private final TrueTypeFont lastResortFont = null;
 
     /** Map of PostScript name substitutes, in priority order. */
     private final Map<String, List<String>> substitutes = new HashMap<>();
@@ -111,9 +111,9 @@ final class FontMapperImpl implements FontMapper
 
         // -------------------------
 
-        try
-        {
-            String resourceName = "/dev.wfj.gwtpdfbox/resources/ttf/LiberationSans-Regular.ttf";
+        //try
+        //{
+            /*String resourceName = "/dev.wfj.gwtpdfbox/resources/ttf/LiberationSans-Regular.ttf";
             InputStream resourceAsStream = FontMapper.class.getResourceAsStream(resourceName);
             if (resourceAsStream == null)
             {
@@ -122,12 +122,13 @@ final class FontMapperImpl implements FontMapper
             RandomAccessReadBuffer randomAccessReadBuffer = new RandomAccessReadBuffer(
                     resourceAsStream);
             TTFParser ttfParser = new TTFParser();
-            lastResortFont = ttfParser.parse(randomAccessReadBuffer);
-        }
-        catch (IOException e)
+            lastResortFont = ttfParser.parse(randomAccessReadBuffer);*/
+            
+        //}
+        /* catch (IOException e)
         {
             throw new RuntimeException(e);
-        }
+        } */
     }
 
     // lazy thread safe singleton
@@ -408,10 +409,7 @@ final class FontMapperImpl implements FontMapper
         }
         
         // make sure the font provider is initialized
-        if (fontProvider == null)
-        {
-            getProvider();
-        }
+        //if (fontProvider == null) getProvider();
 
         // first try to match the PostScript name
         FontInfo info = getFont(format, postScriptName);
@@ -471,7 +469,7 @@ final class FontMapperImpl implements FontMapper
         {
             //if (DomGlobal.console.isDebugEnabled())
             //{
-                DomGlobal.console.debug(String.format("getFont('%s','%s') returns %s", format, postScriptName, info));
+                //TODO: Fix: DomGlobal.console.debug\("getFont('%s','%s') returns %s", format, postScriptName, info));
             //}
             return info;
         }

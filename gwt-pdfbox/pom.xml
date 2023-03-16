@@ -17,6 +17,11 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>org.gwtproject</groupId>
+      <artifactId>gwt-user</artifactId>
+      <version>2.10.0</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.elemental2</groupId>
       <artifactId>elemental2-dom</artifactId>
       <version>1.1.0</version>
@@ -24,6 +29,11 @@
     <dependency>
       <groupId>dev.wfj</groupId>
       <artifactId>gwt-pdfbox-io</artifactId>
+      <version>0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.wfj</groupId>
+      <artifactId>gwt-awt-geom</artifactId>
       <version>0.1</version>
     </dependency>
     <dependency>
@@ -36,14 +46,19 @@
       <artifactId>gwt-zip</artifactId>
       <version>0.1</version>
     </dependency>
-    <dependency>
-      <groupId>org.treblereel.gwt.nio</groupId>
-      <artifactId>gwt-nio</artifactId>
-      <version>1.1</version>
-    </dependency>
-
   </dependencies>
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/java</directory>
+        <includes>
+          <include>**/*.java</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
     <plugins>
       <plugin>
         <groupId>net.ltgt.gwt.maven</groupId>
@@ -54,7 +69,7 @@
           <moduleName>dev.wfj.gwtpdfbox.GwtPdfBox</moduleName>
           <skipModule>true</skipModule>
         </configuration>
-        </plugin>
-      </plugins>
-    </build>
-  </project>
+      </plugin>
+    </plugins>
+  </build>
+</project>

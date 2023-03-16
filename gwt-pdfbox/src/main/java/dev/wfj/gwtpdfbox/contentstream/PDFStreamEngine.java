@@ -16,6 +16,9 @@
  */
 package dev.wfj.gwtpdfbox.contentstream;
 
+import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +42,14 @@ import dev.wfj.gwtpdfbox.pdmodel.MissingResourceException;
 import dev.wfj.gwtpdfbox.pdmodel.PDPage;
 import dev.wfj.gwtpdfbox.pdmodel.PDResources;
 import dev.wfj.gwtpdfbox.pdmodel.common.PDRectangle;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFont;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDType1Font;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDType3CharProc;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDType3Font;
+import dev.wfj.gwtpdfbox.pdmodel.font.Standard14Fonts.FontName;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDColor;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDColorSpace;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.pattern.PDTilingPattern;
 import dev.wfj.gwtpdfbox.pdmodel.graphics.state.PDGraphicsState;
 import dev.wfj.gwtpdfbox.pdmodel.graphics.state.PDTextState;
 import dev.wfj.gwtpdfbox.util.Matrix;
@@ -55,7 +66,6 @@ import dev.wfj.gwtpdfbox.contentstream.operator.OperatorProcessor;
  */
 public abstract class PDFStreamEngine
 {
-
     private final Map<String, OperatorProcessor> operators = new HashMap<>(80);
 
     private Matrix textMatrix;
@@ -72,7 +82,7 @@ public abstract class PDFStreamEngine
     private int level = 0;
 
     // default font, used if there isn't any font available
-    //private PDFont defaultFont;
+    private PDFont defaultFont;
     
     /**
      * Creates a new PDFStreamEngine.
@@ -113,14 +123,14 @@ public abstract class PDFStreamEngine
      * Provide standard 14 Helvetica font as default if there isn't any font available.  
      * @return the default font
      */
-    /*private PDFont getDefaultFont()
+    private PDFont getDefaultFont()
     {
         if (defaultFont == null)
         {
             defaultFont = new PDType1Font(FontName.HELVETICA);
         }
         return defaultFont;
-    }*/
+    }
     
     /**
      * This will initialize and process the contents of the stream.
@@ -156,7 +166,7 @@ public abstract class PDFStreamEngine
      * @param form form XObject
      * @throws IOException if the form cannot be processed
      */
-    /*public void showForm(PDFormXObject form) throws IOException
+    /* public void showForm(PDFormXObject form) throws IOException
     {
         if (currentPage == null)
         {
@@ -167,7 +177,7 @@ public abstract class PDFStreamEngine
         {
             processStream(form);
         }
-    }*/
+    } */
 
     /**
      * Processes a soft mask transparency group stream.
@@ -175,14 +185,14 @@ public abstract class PDFStreamEngine
      * @param group transparency group used for the soft mask
      * @throws IOException if the transparency group cannot be processed
      */
-    /*protected void processSoftMask(PDTransparencyGroup group) throws IOException
+    /* protected void processSoftMask(PDTransparencyGroup group) throws IOException
     {
         saveGraphicsState();
         Matrix softMaskCTM = getGraphicsState().getSoftMask().getInitialTransformationMatrix();
         getGraphicsState().setCurrentTransformationMatrix(softMaskCTM);
         processTransparencyGroup(group);
         restoreGraphicsState();
-    }*/
+    } */
 
     /**
      * Processes a transparency group stream.
@@ -190,7 +200,7 @@ public abstract class PDFStreamEngine
      * @param group transparency group to be processed
      * @throws IOException if the transparency group cannot be processed
      */
-    /*protected void processTransparencyGroup(PDTransparencyGroup group) throws IOException
+    /* protected void processTransparencyGroup(PDTransparencyGroup group) throws IOException
     {
         if (currentPage == null)
         {
@@ -232,7 +242,7 @@ public abstract class PDFStreamEngine
             restoreGraphicsStack(savedStack);
             popResources(parent);
         }
-    }*/
+    } */
 
     /**
      * Processes a Type 3 character stream.
@@ -241,7 +251,7 @@ public abstract class PDFStreamEngine
      * @param textRenderingMatrix the Text Rendering Matrix
      * @throws IOException if there is an error reading or parsing the character content stream.
      */
-    /*protected void processType3Stream(PDType3CharProc charProc, Matrix textRenderingMatrix)
+    protected void processType3Stream(PDType3CharProc charProc, Matrix textRenderingMatrix)
             throws IOException
     {
         if (currentPage == null)
@@ -280,7 +290,7 @@ public abstract class PDFStreamEngine
             restoreGraphicsStack(savedStack);
             popResources(parent);
         }
-    }*/
+    }
 
     /**
      * Process the given annotation with the specified appearance stream.
@@ -289,7 +299,7 @@ public abstract class PDFStreamEngine
      * @param appearance The appearance stream to process.
      * @throws IOException If there is an error reading or parsing the appearance content stream.
      */
-    /*protected void processAnnotation(PDAnnotation annotation, PDAppearanceStream appearance)
+    /* protected void processAnnotation(PDAnnotation annotation, PDAppearanceStream appearance)
             throws IOException
     {
         PDRectangle bbox = appearance.getBBox();
@@ -340,7 +350,7 @@ public abstract class PDFStreamEngine
                 popResources(parent);
             }
         }
-    }*/
+    } */
 
     /**
      * Process the given tiling pattern.
@@ -366,7 +376,7 @@ public abstract class PDFStreamEngine
      * @param patternMatrix the pattern matrix, may be overridden for custom rendering.
      * @throws IOException if there is an error reading or parsing the tiling pattern content stream.
      */
-    /*protected final void processTilingPattern(PDTilingPattern tilingPattern, PDColor color,
+    /* protected final void processTilingPattern(PDTilingPattern tilingPattern, PDColor color,
                                               PDColorSpace colorSpace, Matrix patternMatrix)
             throws IOException
     {
@@ -418,7 +428,7 @@ public abstract class PDFStreamEngine
             restoreGraphicsStack(savedStack);
             popResources(parent);
         }
-    }*/
+    } */
 
     /**
      * Shows the given annotation.
@@ -426,14 +436,14 @@ public abstract class PDFStreamEngine
      * @param annotation An annotation on the current page.
      * @throws IOException If an error occurred reading the annotation
      */
-    /*public void showAnnotation(PDAnnotation annotation) throws IOException
+    /* public void showAnnotation(PDAnnotation annotation) throws IOException
     {
         PDAppearanceStream appearanceStream = getAppearance(annotation);
         if (appearanceStream != null)
         {
             processAnnotation(annotation, appearanceStream);
         }
-    }*/
+    } */
 
     /**
      * Returns the appearance stream to process for the given annotation. May be used to render
@@ -442,10 +452,10 @@ public abstract class PDFStreamEngine
      * @param annotation The current annotation.
      * @return The stream to process.
      */
-    /*public PDAppearanceStream getAppearance(PDAnnotation annotation)
+    /* public PDAppearanceStream getAppearance(PDAnnotation annotation)
     {
         return annotation.getNormalAppearanceStream();
-    }*/
+    } */
 
     /**
      * Process a child stream of the given page. Cannot be used with {@link #processPage(PDPage)}.
@@ -487,7 +497,7 @@ public abstract class PDFStreamEngine
 
         // clip to bounding box
         PDRectangle bbox = contentStream.getBBox();
-        //clipToRect(bbox);
+        clipToRect(bbox);
 
         try
         {
@@ -570,7 +580,7 @@ public abstract class PDFStreamEngine
      * Transforms the given rectangle using the CTM and then intersects it with the current
      * clipping area.
      */
-    /*private void clipToRect(PDRectangle rectangle)
+    private void clipToRect(PDRectangle rectangle)
     {
         if (rectangle != null)
         {
@@ -578,7 +588,7 @@ public abstract class PDFStreamEngine
             GeneralPath clip = rectangle.transform(graphicsState.getCurrentTransformationMatrix());
             graphicsState.intersectClippingPath(clip);
         }
-    }*/
+    }
 
     /**
      * Called when the BT operator is encountered. This method is for overriding in subclasses, the
@@ -624,12 +634,12 @@ public abstract class PDFStreamEngine
         PDTextState textState = getGraphicsState().getTextState();
         float fontSize = textState.getFontSize();
         float horizontalScaling = textState.getHorizontalScaling() / 100f;
-        //PDFont font = textState.getFont();
+        PDFont font = textState.getFont();
         boolean isVertical = false;
-        /*if (font != null)
+        if (font != null)
         {
             isVertical = font.isVertical();
-        }*/
+        }
 
         for (COSBase obj : array)
         {
@@ -695,12 +705,12 @@ public abstract class PDFStreamEngine
         PDTextState textState = state.getTextState();
 
         // get the current font
-        //PDFont font = textState.getFont();
-        /*if (font == null)
+        PDFont font = textState.getFont();
+        if (font == null)
         {
             DomGlobal.console.warn("No current font, will use default");
             font = getDefaultFont();
-        }*/
+        }
 
         float fontSize = textState.getFontSize();
         float horizontalScaling = textState.getHorizontalScaling() / 100f;
@@ -718,7 +728,7 @@ public abstract class PDFStreamEngine
         {
             // decode a character
             int before = in.available();
-            int code = in.read();//font.readCode(in);
+            int code = font.readCode(in);
             int codeLength = before - in.available();
 
             // Word spacing shall be applied to every occurrence of the single-byte character code
@@ -736,30 +746,30 @@ public abstract class PDFStreamEngine
 
             // get glyph's position vector if this is vertical text
             // changes to vertical text should be tested with PDFBOX-2294 and PDFBOX-1422
-            /*if (font.isVertical())
+            if (font.isVertical())
             {
                 // position vector, in text space
                 Vector v = font.getPositionVector(code);
 
                 // apply the position vector to the horizontal origin to get the vertical origin
                 textRenderingMatrix.translate(v);
-            }*/
+            }
 
             // get glyph's horizontal and vertical displacements, in text space
-            Vector w = new Vector(8, 8);//font.getDisplacement(code);
+            Vector w = font.getDisplacement(code);
 
             // process the decoded glyph
-            //showGlyph(textRenderingMatrix, font, code, w);
+            showGlyph(textRenderingMatrix, font, code, w);
 
             // calculate the combined displacements
             float tx;
             float ty;
-            /*if (font.isVertical())
+            if (font.isVertical())
             {
                 tx = 0;
                 ty = w.getY() * fontSize + charSpacing + wordSpacing;
             }
-            else*/
+            else
             {
                 tx = (w.getX() * fontSize + charSpacing + wordSpacing) * horizontalScaling;
                 ty = 0;
@@ -780,7 +790,7 @@ public abstract class PDFStreamEngine
      * @param displacement the displacement (i.e. advance) of the glyph in text space
      * @throws IOException if the glyph cannot be processed
      */
-    /*protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, Vector displacement)
+    protected void showGlyph(Matrix textRenderingMatrix, PDFont font, int code, Vector displacement)
             throws IOException
     {
         if (font instanceof PDType3Font)
@@ -791,7 +801,7 @@ public abstract class PDFStreamEngine
         {
             showFontGlyph(textRenderingMatrix, font, code, displacement);
         }
-    }*/
+    }
 
     /**
      * Called when a glyph is to be processed. This method is intended for overriding in subclasses,
@@ -803,11 +813,11 @@ public abstract class PDFStreamEngine
      * @param displacement the displacement (i.e. advance) of the glyph in text space
      * @throws IOException if the glyph cannot be processed
      */
-    /*protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font,
+    protected void showFontGlyph(Matrix textRenderingMatrix, PDFont font,
             int code, Vector displacement) throws IOException
     {
         // overridden in subclasses
-    }*/
+    }
 
     /**
      * Called when a glyph is to be processed. This method is intended for overriding in subclasses,
@@ -819,7 +829,7 @@ public abstract class PDFStreamEngine
      * @param displacement the displacement (i.e. advance) of the glyph in text space
      * @throws IOException if the glyph cannot be processed
      */
-    /*protected void showType3Glyph(Matrix textRenderingMatrix, PDType3Font font, int code,
+    protected void showType3Glyph(Matrix textRenderingMatrix, PDType3Font font, int code,
             Vector displacement) throws IOException
     {
         PDType3CharProc charProc = font.getCharProc(code);
@@ -827,7 +837,7 @@ public abstract class PDFStreamEngine
         {
             processType3Stream(charProc, textRenderingMatrix);
         }
-    }*/
+    }
 
     /**
      * Called when a marked content group begins
@@ -915,7 +925,8 @@ public abstract class PDFStreamEngine
             throws IOException
     {
         if (exception instanceof MissingOperandException ||
-            exception instanceof MissingResourceException)
+            exception instanceof MissingResourceException/*  ||
+            exception instanceof MissingImageReaderException */)
         {
             DomGlobal.console.error(exception.getMessage());
         }
@@ -1027,7 +1038,7 @@ public abstract class PDFStreamEngine
      * @param array dash array
      * @param phase dash phase
      */
-    /*public void setLineDashPattern(COSArray array, int phase)
+    /* public void setLineDashPattern(COSArray array, int phase)
     {
         if (phase < 0)
         {
@@ -1036,7 +1047,7 @@ public abstract class PDFStreamEngine
         }
         PDLineDashPattern lineDash = new PDLineDashPattern(array, phase);
         getGraphicsState().setLineDashPattern(lineDash);
-    }*/
+    } */
 
     /**
      * @return the stream' resources. This is mainly to be used by the {@link OperatorProcessor}
@@ -1075,12 +1086,13 @@ public abstract class PDFStreamEngine
      * 
      * @return the transformed point
      */
-    /*public Point2D.Float transformedPoint(float x, float y)
+    public Point2D.Float transformedPoint(float x, float y)
     {
         float[] position = { x, y };
-        //getGraphicsState().getCurrentTransformationMatrix().createAffineTransform().transform(position, 0, position, 0, 1);
+        getGraphicsState().getCurrentTransformationMatrix().createAffineTransform()
+                .transform(position, 0, position, 0, 1);
         return new Point2D.Float(position[0], position[1]);
-    }*/
+    }
 
     /**
      * Transforms a width using the CTM.

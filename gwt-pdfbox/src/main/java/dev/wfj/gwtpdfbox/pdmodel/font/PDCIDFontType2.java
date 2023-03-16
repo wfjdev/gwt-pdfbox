@@ -22,14 +22,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import dev.wfj.gwtpdfbox.fontbox.cff.Type2CharString;
-import dev.wfj.gwtpdfbox.fontbox.cmap.CMap;
-import dev.wfj.gwtpdfbox.fontbox.ttf.CmapLookup;
-import dev.wfj.gwtpdfbox.fontbox.ttf.GlyphData;
-import dev.wfj.gwtpdfbox.fontbox.ttf.OTFParser;
-import dev.wfj.gwtpdfbox.fontbox.ttf.OpenTypeFont;
-import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
-import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
+import org.apache.fontbox.cff.Type2CharString;
+import org.apache.fontbox.cmap.CMap;
+import org.apache.fontbox.ttf.CmapLookup;
+import org.apache.fontbox.ttf.GlyphData;
+import org.apache.fontbox.ttf.OTFParser;
+import org.apache.fontbox.ttf.OpenTypeFont;
+import org.apache.fontbox.ttf.TrueTypeFont;
+import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.pdmodel.common.PDRectangle;
 import dev.wfj.gwtpdfbox.pdmodel.common.PDStream;
@@ -374,8 +374,7 @@ public class PDCIDFontType2 extends PDCIDFont
 
         if (cid == 0)
         {
-            throw new IllegalArgumentException(
-                    String.format("No glyph for U+%04X (%c) in font %s", unicode, (char) unicode, getName()));
+            throw new IllegalArgumentException("No glyph for U+"+unicode+"X in font "+getName());
         }
 
         return encodeGlyphId(cid);

@@ -25,11 +25,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import dev.wfj.gwtpdfbox.fontbox.EncodedFont;
-import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
-import dev.wfj.gwtpdfbox.fontbox.type1.DamagedFontException;
-import dev.wfj.gwtpdfbox.fontbox.type1.Type1Font;
-import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
+import org.apache.fontbox.EncodedFont;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.type1.DamagedFontException;
+import org.apache.fontbox.type1.Type1Font;
+import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.cos.COSStream;
@@ -98,7 +98,11 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
      *
      * @param baseFont One of the standard 14 PostScript names, e.g. {@link FontName#HELVETICA_BOLD}.
      */
-    public PDType1Font(FontName baseFont)
+    public PDType1Font(FontName baseFont) {
+        this(baseFont, false);
+    }
+
+    public PDType1Font(FontName baseFont, boolean load)
     {
         super(baseFont);
         
@@ -117,12 +121,22 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
             dict.setItem(COSName.ENCODING, COSName.WIN_ANSI_ENCODING);
             break;
         }
+        
+        type1font = null;
+        isEmbedded = false;
+        isDamaged = false;
+        fontMatrixTransform = new AffineTransform();
+
+        if(!load) {
+            genericFont = null;
+            return;
+        }
 
         // todo: could load the PFB font here if we wanted to support Standard 14 embedding
-        type1font = null;
         FontMapping<FontBoxFont> mapping = FontMappers.instance()
                                                       .getFontBoxFont(getBaseFont(),
                                                                       getFontDescriptor());
+
         genericFont = mapping.getFont();
         
         if (mapping.isFallback())
@@ -139,9 +153,6 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
             }
             DomGlobal.console.warn("Using fallback font " + fontName + " for base font " + getBaseFont());
         }
-        isEmbedded = false;
-        isDamaged = false;
-        fontMatrixTransform = new AffineTransform();
     }
 
     /**
@@ -401,31 +412,25 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
             // this is important on systems with no installed fonts
             if (!encoding.contains(name))
             {
-                throw new IllegalArgumentException(
-                        String.format("U+%04X ('%s') is not available in the font %s, encoding: %s",
-                                unicode, name, getName(), encoding.getEncodingName()));
+                throw new IllegalArgumentException("U+"+unicode+"X  is not available in the font "+name+", encoding: "+ encoding.getEncodingName());
             }
             if (".notdef".equals(name))
             {
-                throw new IllegalArgumentException(
-                        String.format("No glyph for U+%04X in the font %s", unicode, getName()));
+                throw new IllegalArgumentException("No glyph for U+"+unicode+"X in the font");
             }
         }
         else
         {
             if (!encoding.contains(name))
             {
-                throw new IllegalArgumentException(
-                        String.format("U+%04X ('%s') is not available in the font %s (generic: %s), encoding: %s",
-                                unicode, name, getName(), genericFont.getName(), encoding.getEncodingName()));
+                throw new IllegalArgumentException("U+"+unicode+"X is not available in the font");
             }
 
             String nameInFont = getNameInFont(name);
 
             if (".notdef".equals(nameInFont) || !genericFont.hasGlyph(nameInFont))
             {
-                throw new IllegalArgumentException(
-                        String.format("No glyph for U+%04X in the font %s (generic: %s)", unicode, getName(), genericFont.getName()));
+                throw new IllegalArgumentException("No glyph for U+"+unicode+"X in the font");
             }
         }
 
@@ -433,9 +438,7 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
         int code = inverted.get(name);
         if (code < 0)
         {
-            throw new IllegalArgumentException(
-                    String.format("U+%04X ('%s') is not available in the font %s (generic: %s), encoding: %s",
-                            unicode, name, getName(), genericFont.getName(), encoding.getEncodingName()));
+            throw new IllegalArgumentException("U+"+unicode+"X is not available in the font");
         }
         bytes = new byte[] { (byte)code };
         codeToBytesMap.put(unicode, bytes);

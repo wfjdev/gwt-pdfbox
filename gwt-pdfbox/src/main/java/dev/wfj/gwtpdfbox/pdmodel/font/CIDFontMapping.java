@@ -17,8 +17,8 @@
 
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
-import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
-import dev.wfj.gwtpdfbox.fontbox.ttf.OpenTypeFont;
+import org.apache.fontbox.FontBoxFont;
+import org.apache.fontbox.ttf.OpenTypeFont;
 
 /**
  * A CIDFontMapping is a kind of FontMapping which allows for an additional TrueTypeFont substitute

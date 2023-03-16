@@ -168,7 +168,7 @@ public final class PDPageContentStream extends PDAbstractContentStream implement
                 // save the pre-append graphics state
                 try (OutputStream prefixOut = prefixStream.createOutputStream())
                 {
-                    prefixOut.write("q".getBytes());//StandardCharsets.US_ASCII));
+                    prefixOut.write("q".getBytes()/*Charset.forName("US-ASCII"))*/);
                     prefixOut.write('\n');
                 }
 
