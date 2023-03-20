@@ -16,9 +16,9 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel.font.encoding;
 
-import org.apache.fontbox.afm.CharMetric;
-import org.apache.fontbox.afm.FontMetrics;
 import dev.wfj.gwtpdfbox.cos.COSBase;
+import dev.wfj.gwtpdfbox.fontbox.afm.CharMetric;
+import dev.wfj.gwtpdfbox.fontbox.afm.FontMetrics;
 
 import java.util.Map;
 
@@ -32,7 +32,7 @@ public class Type1Encoding extends Encoding
      *
      * @param encoding FontBox encoding
      */
-    public static Type1Encoding fromFontBox(org.apache.fontbox.encoding.Encoding encoding)
+    public static Type1Encoding fromFontBox(dev.wfj.gwtpdfbox.fontbox.encoding.Encoding encoding)
     {
         // todo: could optimise this by looking for specific subclasses
         Map<Integer,String> codeToName = encoding.getCodeToNameMap();

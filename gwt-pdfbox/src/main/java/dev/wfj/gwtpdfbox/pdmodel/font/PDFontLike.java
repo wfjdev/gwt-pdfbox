@@ -18,7 +18,8 @@
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
 import java.io.IOException;
-import org.apache.fontbox.util.BoundingBox;
+
+import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.util.Matrix;
 import dev.wfj.gwtpdfbox.util.Vector;
 

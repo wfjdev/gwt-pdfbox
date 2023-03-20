@@ -20,7 +20,8 @@ package dev.wfj.gwtpdfbox.pdmodel.font;
 //import java.lang.ref.SoftReference;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.fontbox.FontBoxFont;
+
+import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
 
 /**
  * An in-memory cache for system fonts. This allows PDFBox to manage caching for a {@link FontProvider}.

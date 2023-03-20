@@ -29,11 +29,11 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.afm.AFMParser;
-import org.apache.fontbox.afm.FontMetrics;
 
 import dev.wfj.gwtpdfbox.GwtFontResources;
+import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
+import dev.wfj.gwtpdfbox.fontbox.afm.AFMParser;
+import dev.wfj.gwtpdfbox.fontbox.afm.FontMetrics;
 import dev.wfj.gwtpdfbox.pdmodel.font.encoding.GlyphList;
 import dev.wfj.gwtpdfbox.pdmodel.font.encoding.SymbolEncoding;
 

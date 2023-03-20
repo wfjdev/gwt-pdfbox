@@ -22,13 +22,13 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.cos.COSStream;
+import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
+import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.pdmodel.PDResources;
 import dev.wfj.gwtpdfbox.pdmodel.ResourceCache;
 import dev.wfj.gwtpdfbox.pdmodel.common.PDRectangle;

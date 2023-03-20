@@ -30,16 +30,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
-import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.ttf.OpenTypeFont;
-import org.apache.fontbox.ttf.TTFParser;
-import org.apache.fontbox.ttf.TrueTypeFont;
-import org.apache.fontbox.type1.Type1Font;
 
 import com.googlecode.gwt.crypto.bouncycastle.util.encoders.Base64;
 import com.googlecode.gwt.crypto.bouncycastle.util.encoders.UrlBase64;
 
 import dev.wfj.gwtpdfbox.GwtFontResources;
+import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
+import dev.wfj.gwtpdfbox.fontbox.ttf.OpenTypeFont;
+import dev.wfj.gwtpdfbox.fontbox.ttf.TTFParser;
+import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
+import dev.wfj.gwtpdfbox.fontbox.type1.Type1Font;
 import dev.wfj.gwtpdfbox.io.RandomAccessReadBuffer;
 import dev.wfj.gwtpdfbox.pdmodel.font.Standard14Fonts.FontName;
 import elemental2.dom.DomGlobal;

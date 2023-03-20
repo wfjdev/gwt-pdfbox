@@ -19,13 +19,12 @@ package dev.wfj.gwtpdfbox.pdmodel.common;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.Arrays;
+
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSFloat;
 import dev.wfj.gwtpdfbox.cos.COSNumber;
-
-import org.apache.fontbox.util.BoundingBox;
-
+import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.util.Matrix;
 
 /**

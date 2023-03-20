@@ -25,14 +25,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.fontbox.afm.FontMetrics;
-import org.apache.fontbox.cmap.CMap;
+
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.cos.COSNumber;
 import dev.wfj.gwtpdfbox.cos.COSStream;
+import dev.wfj.gwtpdfbox.fontbox.afm.FontMetrics;
+import dev.wfj.gwtpdfbox.fontbox.cmap.CMap;
 import dev.wfj.gwtpdfbox.io.RandomAccessRead;
 import dev.wfj.gwtpdfbox.pdmodel.common.COSObjectable;
 import dev.wfj.gwtpdfbox.pdmodel.font.Standard14Fonts.FontName;

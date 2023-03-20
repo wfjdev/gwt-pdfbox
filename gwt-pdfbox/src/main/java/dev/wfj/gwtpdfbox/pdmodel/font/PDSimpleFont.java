@@ -21,10 +21,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.fontbox.FontBoxFont;
+
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
+import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
 import dev.wfj.gwtpdfbox.pdmodel.common.PDRectangle;
 import dev.wfj.gwtpdfbox.pdmodel.font.Standard14Fonts.FontName;
 import dev.wfj.gwtpdfbox.pdmodel.font.encoding.DictionaryEncoding;

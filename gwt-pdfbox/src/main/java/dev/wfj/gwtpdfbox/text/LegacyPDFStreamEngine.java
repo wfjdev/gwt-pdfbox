@@ -22,9 +22,6 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.HashMap;
 
-import org.apache.fontbox.ttf.TrueTypeFont;
-import org.apache.fontbox.util.BoundingBox;
-
 import dev.wfj.gwtpdfbox.GwtFontResources;
 import dev.wfj.gwtpdfbox.contentstream.PDFStreamEngine;
 import dev.wfj.gwtpdfbox.pdmodel.PDPage;
@@ -64,6 +61,8 @@ import dev.wfj.gwtpdfbox.contentstream.operator.text.SetTextRise;
 import dev.wfj.gwtpdfbox.contentstream.operator.text.SetWordSpacing;
 import dev.wfj.gwtpdfbox.contentstream.operator.text.ShowText;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
+import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
+import dev.wfj.gwtpdfbox.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.pdmodel.font.PDFontDescriptor;
 
 /**

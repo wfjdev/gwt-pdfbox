@@ -23,11 +23,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.fontbox.ttf.HorizontalMetricsTable;
-import org.apache.fontbox.ttf.TrueTypeFont;
+
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
+import dev.wfj.gwtpdfbox.fontbox.ttf.HorizontalMetricsTable;
+import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
 import dev.wfj.gwtpdfbox.pdmodel.PDDocument;
 import dev.wfj.gwtpdfbox.pdmodel.font.encoding.Encoding;
 import dev.wfj.gwtpdfbox.pdmodel.font.encoding.GlyphList;

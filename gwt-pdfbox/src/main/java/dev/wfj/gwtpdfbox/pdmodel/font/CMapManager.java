@@ -16,8 +16,8 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
-import org.apache.fontbox.cmap.CMap;
-import org.apache.fontbox.cmap.CMapParser;
+import dev.wfj.gwtpdfbox.fontbox.cmap.CMap;
+import dev.wfj.gwtpdfbox.fontbox.cmap.CMapParser;
 import dev.wfj.gwtpdfbox.io.RandomAccessRead;
 
 import java.io.IOException;

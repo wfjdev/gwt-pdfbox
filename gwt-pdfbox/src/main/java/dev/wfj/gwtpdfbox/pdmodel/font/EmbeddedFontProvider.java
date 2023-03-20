@@ -3,7 +3,7 @@ package dev.wfj.gwtpdfbox.pdmodel.font;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.fontbox.ttf.TrueTypeFont;
+import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
 
 public class EmbeddedFontProvider extends FontProvider {
     private final FontCache cache;

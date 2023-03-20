@@ -17,7 +17,7 @@
 
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
-import org.apache.fontbox.FontBoxFont;
+import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
 
 /**
  * A font mapping from a PDF font to a FontBox font.

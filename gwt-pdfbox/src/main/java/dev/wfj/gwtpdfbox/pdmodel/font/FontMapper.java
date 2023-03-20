@@ -16,8 +16,8 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
-import org.apache.fontbox.FontBoxFont;
-import org.apache.fontbox.ttf.TrueTypeFont;
+import dev.wfj.gwtpdfbox.fontbox.FontBoxFont;
+import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
 
 /**
  * Font mapper, locates non-embedded fonts. If you implement this then you're responsible for

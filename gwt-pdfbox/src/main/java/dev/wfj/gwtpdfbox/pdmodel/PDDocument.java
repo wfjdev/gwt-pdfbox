@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.fontbox.ttf.TrueTypeFont;
 import dev.wfj.gwtpdfbox.cos.COSArray;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
@@ -44,6 +43,7 @@ import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.cos.COSObject;
 import dev.wfj.gwtpdfbox.cos.COSObjectKey;
 import dev.wfj.gwtpdfbox.cos.COSUpdateInfo;
+import dev.wfj.gwtpdfbox.fontbox.ttf.TrueTypeFont;
 import dev.wfj.gwtpdfbox.io.IOUtils;
 import dev.wfj.gwtpdfbox.io.RandomAccessRead;
 import dev.wfj.gwtpdfbox.io.RandomAccessStreamCache.StreamCacheCreateFunction;
