@@ -28,7 +28,7 @@ public class NameRecord
     // platform ids
     public static final int PLATFORM_UNICODE = 0;
     public static final int PLATFORM_MACINTOSH = 1;
-    //public static final int PLATFORM_ISO = 2;
+    public static final int PLATFORM_ISO = 2;
     public static final int PLATFORM_WINDOWS = 3;
 
     // Unicode encoding ids

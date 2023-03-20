@@ -43,6 +43,7 @@ import dev.wfj.gwtpdfbox.io.IOUtils;
 import dev.wfj.gwtpdfbox.io.RandomAccessRead;
 import dev.wfj.gwtpdfbox.io.RandomAccessReadView;
 import dev.wfj.gwtpdfbox.pdfparser.XrefTrailerResolver.XRefType;
+
 import elemental2.dom.DomGlobal;
 
 /**
@@ -83,13 +84,11 @@ public class COSParser extends BaseParser implements ICOSParser
      * The range within the %%EOF marker will be searched.
      * Useful if there are additional characters after %%EOF within the PDF. 
      */
-    public static final String SYSPROP_EOFLOOKUPRANGE =
-            "dev.wfj.gwtpdfbox.pdfparser.nonSequentialPDFParser.eofLookupRange";
 
     /**
      * How many trailing bytes to read for EOF marker.
      */
-    private static final int DEFAULT_TRAIL_BYTECOUNT = 2048;
+    public static final int DEFAULT_TRAIL_BYTECOUNT = 2048;
     /**
      * EOF-marker.
      */
@@ -242,15 +241,15 @@ public class COSParser extends BaseParser implements ICOSParser
         }
         if (rebuildTrailer)
         {
-            trailer = getBruteForceParser().rebuildTrailer(xrefTrailerResolver);//, null);
+            trailer = getBruteForceParser().rebuildTrailer(xrefTrailerResolver);
             trailerWasRebuild = true;
             // transfer encryption information from BruteForceParser
-            /*encryption = getBruteForceParser().getEncryption();
+            /* encryption = getBruteForceParser().getEncryption();
             if (encryption != null)
             {
                 securityHandler = encryption.getSecurityHandler();
                 accessPermission = securityHandler.getCurrentAccessPermission();
-            }*/
+            } */
         }
         else
         {
@@ -692,10 +691,10 @@ public class COSParser extends BaseParser implements ICOSParser
             {
                 COSStream stream = parseCOSStream((COSDictionary) parsedObject);
 
-                /*if (securityHandler != null)
+                /* if (securityHandler != null)
                 {
                     securityHandler.decryptStream(stream, objKey.getNumber(), objKey.getGeneration());
-                }*/
+                } */
                 parsedObject = stream;
             }
             else
@@ -721,10 +720,10 @@ public class COSParser extends BaseParser implements ICOSParser
                 }
             }
         }
-        /*else if (securityHandler != null)
+        /* else if (securityHandler != null)
         {
             securityHandler.decrypt(parsedObject, objKey.getNumber(), objKey.getGeneration());
-        }*/
+        } */
 
         if (!endObjectKey.startsWith(ENDOBJ_STRING))
         {
@@ -869,7 +868,7 @@ public class COSParser extends BaseParser implements ICOSParser
         {
             if (isLenient)
             {
-                DomGlobal.console.warn("The stream doesn't provide any stream length, using fallback readUntilEnd, at offset "
+               DomGlobal.console.warn("The stream doesn't provide any stream length, using fallback readUntilEnd, at offset "
                     + source.getPosition());
             }
             else
@@ -1789,7 +1788,7 @@ public class COSParser extends BaseParser implements ICOSParser
      *
      * @throws IOException If there is an error getting the document.
      */
-    /*protected PDEncryption getEncryption() throws IOException
+    /* protected PDEncryption getEncryption() throws IOException
     {
         if (document == null)
         {
@@ -1797,7 +1796,7 @@ public class COSParser extends BaseParser implements ICOSParser
                     "You must parse the document first before calling getEncryption()");
         }
         return encryption;
-    }*/
+    } */
 
     /**
      * This will get the AccessPermission. The document must be parsed before this is called.
@@ -1806,7 +1805,7 @@ public class COSParser extends BaseParser implements ICOSParser
      *
      * @throws IOException If there is an error getting the document.
      */
-    /*protected AccessPermission getAccessPermission() throws IOException
+    /* protected AccessPermission getAccessPermission() throws IOException
     {
         if (document == null)
         {
@@ -1814,7 +1813,7 @@ public class COSParser extends BaseParser implements ICOSParser
                     "You must parse the document first before calling getAccessPermission()");
         }
         return accessPermission;
-    }*/
+    } */
 
     /**
      * Prepare for decryption.
@@ -1822,7 +1821,7 @@ public class COSParser extends BaseParser implements ICOSParser
      * @throws InvalidPasswordException If the password is incorrect.
      * @throws IOException if something went wrong
      */
-    /*protected void prepareDecryption() throws IOException
+    /* protected void prepareDecryption() throws IOException
     {
         if (encryption != null)
         {
@@ -1870,6 +1869,6 @@ public class COSParser extends BaseParser implements ICOSParser
                 IOUtils.closeQuietly(keyStoreInputStream);
             }
         }
-    }*/
+    } */
 
 }

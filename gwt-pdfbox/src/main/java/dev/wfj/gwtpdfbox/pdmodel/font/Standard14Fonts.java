@@ -20,7 +20,7 @@ package dev.wfj.gwtpdfbox.pdmodel.font;
 import static dev.wfj.gwtpdfbox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
 
 import java.awt.geom.GeneralPath;
-//import java.io.BufferedInputStream;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,16 +31,11 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.afm.AFMParser;
-//import org.apache.fontbox.afm.AFMParser;
 import org.apache.fontbox.afm.FontMetrics;
 
-import com.google.gwt.resources.client.TextResource;
-
-import dev.wfj.gwtpdfbox.FontResources;
+import dev.wfj.gwtpdfbox.GwtFontResources;
 import dev.wfj.gwtpdfbox.pdmodel.font.encoding.GlyphList;
 import dev.wfj.gwtpdfbox.pdmodel.font.encoding.SymbolEncoding;
-
-
 
 /**
  * The "Standard 14" PDF fonts, also known as the "base 14" fonts.
@@ -77,12 +72,12 @@ public final class Standard14Fonts
     static
     {
         // the 14 standard fonts
-        /* mapName(FontName.COURIER);
+        mapName(FontName.COURIER);
         mapName(FontName.COURIER_BOLD);
         mapName(FontName.COURIER_BOLD_OBLIQUE);
-        mapName(FontName.COURIER_OBLIQUE); */
+        mapName(FontName.COURIER_OBLIQUE);
         mapName(FontName.HELVETICA);
-        /* mapName(FontName.HELVETICA_BOLD);
+        mapName(FontName.HELVETICA_BOLD);
         mapName(FontName.HELVETICA_BOLD_OBLIQUE);
         mapName(FontName.HELVETICA_OBLIQUE);
         mapName(FontName.TIMES_ROMAN);
@@ -90,10 +85,10 @@ public final class Standard14Fonts
         mapName(FontName.TIMES_BOLD_ITALIC);
         mapName(FontName.TIMES_ITALIC);
         mapName(FontName.SYMBOL);
-        mapName(FontName.ZAPF_DINGBATS); */
+        mapName(FontName.ZAPF_DINGBATS);
 
         // alternative names from Adobe Supplement to the ISO 32000
-        /* mapName("CourierCourierNew", FontName.COURIER);
+        mapName("CourierCourierNew", FontName.COURIER);
         mapName("CourierNew", FontName.COURIER);
         mapName("CourierNew,Italic", FontName.COURIER_OBLIQUE);
         mapName("CourierNew,Bold", FontName.COURIER_BOLD);
@@ -105,22 +100,22 @@ public final class Standard14Fonts
         mapName("TimesNewRoman", FontName.TIMES_ROMAN);
         mapName("TimesNewRoman,Italic", FontName.TIMES_ITALIC);
         mapName("TimesNewRoman,Bold", FontName.TIMES_BOLD);
-        mapName("TimesNewRoman,BoldItalic", FontName.TIMES_BOLD_ITALIC); */
+        mapName("TimesNewRoman,BoldItalic", FontName.TIMES_BOLD_ITALIC);
 
         // Acrobat treats these fonts as "standard 14" too (at least Acrobat preflight says so)
-        /* mapName("Symbol,Italic", FontName.SYMBOL);
+        mapName("Symbol,Italic", FontName.SYMBOL);
         mapName("Symbol,Bold", FontName.SYMBOL);
         mapName("Symbol,BoldItalic", FontName.SYMBOL);
         mapName("Times", FontName.TIMES_ROMAN);
         mapName("Times,Italic", FontName.TIMES_ITALIC);
         mapName("Times,Bold", FontName.TIMES_BOLD);
-        mapName("Times,BoldItalic", FontName.TIMES_BOLD_ITALIC); */
+        mapName("Times,BoldItalic", FontName.TIMES_BOLD_ITALIC);
 
         // PDFBOX-3457: PDF.js file bug864847.pdf
-        /* mapName("ArialMT", FontName.HELVETICA);
+        mapName("ArialMT", FontName.HELVETICA);
         mapName("Arial-ItalicMT", FontName.HELVETICA_OBLIQUE);
         mapName("Arial-BoldMT", FontName.HELVETICA_BOLD);
-        mapName("Arial-BoldItalicMT", FontName.HELVETICA_BOLD_OBLIQUE); */
+        mapName("Arial-BoldItalicMT", FontName.HELVETICA_BOLD_OBLIQUE);
     }
 
     private Standard14Fonts()
@@ -129,16 +124,14 @@ public final class Standard14Fonts
 
     /**
      * Loads the metrics for the base font specified by name. Metric file must exist in the pdfbox jar under
-     * /dev.wfj.gwtpdfbox/resources/afm/
+     * /org/apache/pdfbox/resources/afm/
      *
      * @param fontName one of the standard 14 font names for which to load the metrics.
      * @throws IOException if no metrics exist for that font.
      */
     private static void loadMetrics(FontName fontName) throws IOException
     {
-        TextResource fontResource = fontName.getResource();
-        if(fontResource == null) throw new IOException("Font resource not found");
-        try (InputStream afmStream = new ByteArrayInputStream(fontResource.getText().getBytes()))
+        try (InputStream afmStream = new ByteArrayInputStream(GwtFontResources.INSTANCE.helveticaAfm().getText().getBytes()))
         {
             AFMParser parser = new AFMParser(afmStream);
             FontMetrics metric = parser.parse(true);
@@ -316,38 +309,31 @@ public final class Standard14Fonts
      */
     public enum FontName
     {
-        TIMES_ROMAN("Times-Roman", null), //
-        TIMES_BOLD("Times-Bold", null), //
-        TIMES_ITALIC("Times-Italic", null), //
-        TIMES_BOLD_ITALIC("Times-BoldItalic", null), //
-        HELVETICA("Helvetica", FontResources.INSTANCE.helvetica()), //
-        HELVETICA_BOLD("Helvetica-Bold", null), //
-        HELVETICA_OBLIQUE("Helvetica-Oblique", null), //
-        HELVETICA_BOLD_OBLIQUE("Helvetica-BoldOblique", null), //
-        COURIER("Courier", null), //
-        COURIER_BOLD("Courier-Bold", null), //
-        COURIER_OBLIQUE("Courier-Oblique", null), //
-        COURIER_BOLD_OBLIQUE("Courier-BoldOblique", null), //
-        SYMBOL("Symbol", null), //
-        ZAPF_DINGBATS("ZapfDingbats", null);
+        TIMES_ROMAN("Times-Roman"), //
+        TIMES_BOLD("Times-Bold"), //
+        TIMES_ITALIC("Times-Italic"), //
+        TIMES_BOLD_ITALIC("Times-BoldItalic"), //
+        HELVETICA("Helvetica"), //
+        HELVETICA_BOLD("Helvetica-Bold"), //
+        HELVETICA_OBLIQUE("Helvetica-Oblique"), //
+        HELVETICA_BOLD_OBLIQUE("Helvetica-BoldOblique"), //
+        COURIER("Courier"), //
+        COURIER_BOLD("Courier-Bold"), //
+        COURIER_OBLIQUE("Courier-Oblique"), //
+        COURIER_BOLD_OBLIQUE("Courier-BoldOblique"), //
+        SYMBOL("Symbol"), //
+        ZAPF_DINGBATS("ZapfDingbats");
 
         private final String name;
-        private final TextResource resource;
 
-        private FontName(String name, TextResource resource)
+        private FontName(String name)
         {
             this.name = name;
-            this.resource = resource;
         }
 
         public String getName()
         {
             return name;
-        }
-
-        public TextResource getResource()
-        {
-            return resource;
         }
 
         @Override

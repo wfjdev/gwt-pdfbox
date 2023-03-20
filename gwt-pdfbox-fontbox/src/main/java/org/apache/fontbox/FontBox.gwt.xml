@@ -3,4 +3,5 @@
     "http://gwtproject.org/doctype/2.8.2/gwt-module.dtd">
 <module>
   <source path="" />
+  <super-source path="super"/>
 </module>

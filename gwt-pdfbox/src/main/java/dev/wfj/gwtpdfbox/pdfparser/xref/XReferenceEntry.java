@@ -17,9 +17,6 @@
 package dev.wfj.gwtpdfbox.pdfparser.xref;
 
 import dev.wfj.gwtpdfbox.cos.COSObjectKey;
-import dev.wfj.gwtpdfbox.pdfparser.xref.XReferenceEntry;
-import dev.wfj.gwtpdfbox.pdfparser.xref.XReferenceType;
-
 import dev.wfj.gwtpdfbox.pdfparser.PDFXRefStream;
 
 /**

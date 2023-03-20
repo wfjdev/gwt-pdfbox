@@ -164,7 +164,7 @@ public class TTFParser
             }
         }
 
-        boolean hasCFF = false;//font.tables.containsKey(CFFTable.TAG);
+        boolean hasCFF = font.tables.containsKey(CFFTable.TAG);
         boolean isPostScript = allowCFF() && hasCFF;
         
         HeaderTable head = font.getHeader();

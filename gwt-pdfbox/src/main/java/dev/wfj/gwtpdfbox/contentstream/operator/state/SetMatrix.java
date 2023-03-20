@@ -26,6 +26,7 @@ import dev.wfj.gwtpdfbox.contentstream.operator.OperatorProcessor;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSNumber;
 import dev.wfj.gwtpdfbox.util.Matrix;
+import elemental2.dom.DomGlobal;
 
 /**
  * Tm: Set text matrix and text line matrix.

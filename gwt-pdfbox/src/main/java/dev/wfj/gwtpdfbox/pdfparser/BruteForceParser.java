@@ -290,8 +290,8 @@ public class BruteForceParser extends COSParser
      * @param securityHandler security handler to be used to decrypt encrypted documents
      * @throws IOException if something went wrong
      */
-    protected void bfSearchForObjStreams(XrefTrailerResolver trailerResolver/*,
-            SecurityHandler<? extends ProtectionPolicy> securityHandler*/) throws IOException
+    protected void bfSearchForObjStreams(XrefTrailerResolver trailerResolver/* ,
+            SecurityHandler<? extends ProtectionPolicy> securityHandler */) throws IOException
     {
         // update security handler
         //this.securityHandler = securityHandler;
@@ -300,7 +300,7 @@ public class BruteForceParser extends COSParser
 
         Map<Long, COSObjectKey> bfSearchForObjStreamOffsets = bfSearchForObjStreamOffsets();
         Map<COSObjectKey, Long> bfCOSObjectOffsets = getBFCOSObjectOffsets();
-        // DomGlobal.console warning about skipped stream
+        // log warning about skipped stream
         bfSearchForObjStreamOffsets.entrySet().stream() //
                 .filter(o -> bfCOSObjectOffsets.get(o.getValue()) == null) //
                 .forEach(o -> DomGlobal.console.warn(
@@ -324,10 +324,10 @@ public class BruteForceParser extends COSParser
             {
                 COSDictionary dict = parseCOSDictionary(false);
                 stream = parseCOSStream(dict);
-                /*if (securityHandler != null)
+                /* if (securityHandler != null)
                 {
                     securityHandler.decryptStream(stream, stmObjNumber, stmGenNumber);
-                }*/
+                } */
                 PDFObjectStreamParser objStreamParser = new PDFObjectStreamParser(stream, document);
                 Map<Long, Integer> objectNumbers = objStreamParser.readObjectNumbers();
                 Map<COSObjectKey, Long> xrefOffset = trailerResolver.getXrefTable();
@@ -465,7 +465,7 @@ public class BruteForceParser extends COSParser
                 continue;
             }
             COSDictionary dictionary = (COSDictionary) baseObject;
-            // document cataDomGlobal.console
+            // document catalog
             if (isCatalog(dictionary))
             {
                 rootObject = compareCOSObjects(cosObject, entrySet.getValue(), rootObject);
@@ -752,7 +752,7 @@ public class BruteForceParser extends COSParser
     }
 
     /**
-     * Tell if the dictionary is a PDF or FDF cataDomGlobal.console.
+     * Tell if the dictionary is a PDF or FDF catalog.
      * 
      * @param dictionary
      * @return true if the given dictionary is a root dictionary
@@ -812,8 +812,8 @@ public class BruteForceParser extends COSParser
      * 
      * @throws IOException if something went wrong
      */
-    protected COSDictionary rebuildTrailer(XrefTrailerResolver trailerResolver/*,
-            SecurityHandler<? extends ProtectionPolicy> securityHandler*/) throws IOException
+    protected COSDictionary rebuildTrailer(XrefTrailerResolver trailerResolver/* ,
+            SecurityHandler<? extends ProtectionPolicy> securityHandler */) throws IOException
     {
         // update security handler
         //this.securityHandler = securityHandler;

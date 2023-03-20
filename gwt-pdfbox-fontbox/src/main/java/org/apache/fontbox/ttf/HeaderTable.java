@@ -80,8 +80,10 @@ public class HeaderTable extends TTFTable
         magicNumber = data.readUnsignedInt();
         flags = data.readUnsignedShort();
         unitsPerEm = data.readUnsignedShort();
-        //created = data.readInternationalDate();
-        //modified = data.readInternationalDate();
+        //created = 
+        data.readInternationalDate();
+        //modified = 
+        data.readInternationalDate();
         xMin = data.readSignedShort();
         yMin = data.readSignedShort();
         xMax = data.readSignedShort();

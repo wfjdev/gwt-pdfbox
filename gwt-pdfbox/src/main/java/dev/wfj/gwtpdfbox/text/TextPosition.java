@@ -16,7 +16,6 @@
  */
 package dev.wfj.gwtpdfbox.text;
 
-import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -313,21 +312,21 @@ public final class TextPosition
      * @param rotation Rotation to apply to text to adjust the 0,0 location (0,90,180,270)
      * @return The y coordinate of the text
      */
-    private float getYLowerLeftRot(float rotation)
+    private float getYLowerLeftRot(double rotation)
     {
-        if (Float.compare(rotation, 0) == 0)
+        if (Double.compare(rotation, 0) == 0)
         {
             return textMatrix.getTranslateY();
         }
-        else if (Float.compare(rotation, 90) == 0)
+        else if (Double.compare(rotation, 90) == 0)
         {
             return pageWidth - textMatrix.getTranslateX();
         }
-        else if (Float.compare(rotation, 180) == 0)
+        else if (Double.compare(rotation, 180) == 0)
         {
             return pageHeight - textMatrix.getTranslateY();
         }
-        else if (Float.compare(rotation, 270) == 0)
+        else if (Double.compare(rotation, 270) == 0)
         {
             return textMatrix.getTranslateX();
         }
@@ -367,7 +366,7 @@ public final class TextPosition
     {
         float dir = getDir();
         // some PDFBox code assumes that the 0,0 point is in upper left, not lower left
-        if (Float.compare(dir, 0) == 0 || Float.compare(dir, 180) == 0)
+        if (Double.compare(dir, 0) == 0 || Double.compare(dir, 180) == 0)
         {
             return pageHeight - getYLowerLeftRot(dir);
         }
@@ -575,7 +574,7 @@ public final class TextPosition
      *
      * @param diacritic TextPosition to merge into the current TextPosition.
      */
-    /* public void mergeDiacritic(TextPosition diacritic)
+    public void mergeDiacritic(TextPosition diacritic)
     {
         if (diacritic.getUnicode().length() > 1)
         {
@@ -594,8 +593,7 @@ public final class TextPosition
         {
             if (i >= widths.length)
             {
-                DomGlobal.console.info("diacritic " + diacritic.getUnicode() + " on ligature " + unicode + 
-                        " is not supported yet and is ignored (PDFBOX-2831)");
+                DomGlobal.console.info("diacritic " + diacritic.getUnicode() + " on ligature " + unicode + " is not supported yet and is ignored (PDFBOX-2831)");
                 break;
             }
             float currCharXEnd = currCharXStart + widths[i];
@@ -652,7 +650,7 @@ public final class TextPosition
             // couldn't find anything useful so we go to the next character in the TextPosition
             currCharXStart += widths[i];
         }
-    } */
+    }
 
     /**
      * Inserts the diacritic TextPosition to the str of this TextPosition and updates the widths
@@ -661,7 +659,7 @@ public final class TextPosition
      * @param i current character
      * @param diacritic The diacritic TextPosition
      */
-    /* private void insertDiacritic(int i, TextPosition diacritic)
+    private void insertDiacritic(int i, TextPosition diacritic)
     {
         StringBuilder sb = new StringBuilder();
         sb.append(unicode, 0, i);
@@ -682,7 +680,7 @@ public final class TextPosition
 
         unicode = sb.toString();
         widths = widths2;
-    } */
+    }
 
     /**
      * Combine the diacritic, for example, convert non-combining diacritic characters to their
@@ -691,7 +689,7 @@ public final class TextPosition
      * @param str String to normalize
      * @return Normalized string
      */
-    /* private String combineDiacritic(String str)
+    private String combineDiacritic(String str)
     {
         // Unicode contains special combining forms of the diacritic characters which we want to use
         int codePoint = str.codePointAt(0);
@@ -703,17 +701,17 @@ public final class TextPosition
         }
         else
         {
-            return Normalizer.normalize(str, Normalizer.Form.NFKC).trim();
+            return str;
+            //return Normalizer.normalize(str, Normalizer.Form.NFKC).trim();
         }
-    } */
+    }
 
     /**
      * @return True if the current character is a diacritic char.
      */
     public boolean isDiacritic()
     {
-        return false;
-        /* String text = this.getUnicode();
+        String text = this.getUnicode();
         if (text.length() != 1)
         {
             return false;
@@ -726,10 +724,11 @@ public final class TextPosition
             // Ignoring it as diacritic avoids trouble if it slightly overlaps with the next glyph.
             return false;
         }
-        int type = Character.getType(text.charAt(0));
-        return type == Character.NON_SPACING_MARK ||
-               type == Character.MODIFIER_SYMBOL ||
-               type == Character.MODIFIER_LETTER; */
+        return false;
+        /*int type = Character.getType(text.charAt(0));
+        return type == NON_SPACING_MARK ||
+               type == MODIFIER_SYMBOL ||
+               type == MODIFIER_LETTER;*/
 
   }
 

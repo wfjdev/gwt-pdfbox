@@ -20,11 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-
-
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.util.Hex;
-
 import elemental2.dom.DomGlobal;
 
 /**
@@ -34,7 +31,6 @@ import elemental2.dom.DomGlobal;
  */
 final class ASCIIHexFilter extends Filter
 {
-    
     private static final int[] REVERSE_HEX = {
       /*   0 */  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
       /*  10 */  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

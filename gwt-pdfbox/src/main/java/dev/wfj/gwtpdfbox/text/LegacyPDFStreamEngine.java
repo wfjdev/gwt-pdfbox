@@ -16,6 +16,7 @@
  */
 package dev.wfj.gwtpdfbox.text;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.util.BoundingBox;
+
+import dev.wfj.gwtpdfbox.GwtFontResources;
 import dev.wfj.gwtpdfbox.contentstream.PDFStreamEngine;
 import dev.wfj.gwtpdfbox.pdmodel.PDPage;
 import dev.wfj.gwtpdfbox.pdmodel.font.encoding.GlyphList;
@@ -78,23 +81,20 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
     private int pageRotation;
     private PDRectangle pageSize;
     private Matrix translateMatrix;
-    //private static final GlyphList GLYPHLIST;
+    private static final GlyphList GLYPHLIST;
     private final Map<COSDictionary, Float> fontHeightMap = new HashMap<>();
 
-    /*static
+    static
     {
-        // load additional glyph list for Unicode mapping
-        String path = "/org/apache/pdfbox/resources/glyphlist/additional.txt";
-        //no need to use a BufferedInputSteam here, as GlyphList uses a BufferedReader
-        try (InputStream input = GlyphList.class.getResourceAsStream(path))
+        try (InputStream input = new ByteArrayInputStream(GwtFontResources.INSTANCE.additionalGlyphs().getText().getBytes()))
         {
-            GLYPHLIST = new GlyphList(GlyphList.getAdobeGlyphList(), input);
+            GLYPHLIST = new GlyphList(GlyphList.getAdobeGlyphList(), GwtFontResources.INSTANCE.additionalGlyphs().getText());
         }
-        catch (IOException ex)
+        catch (IOException e)
         {
-            throw new RuntimeException(ex);
+            throw new RuntimeException(e);
         }
-    }*/
+    }
 
     /**
      * Constructor.
@@ -137,7 +137,7 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
         this.pageRotation = page.getRotation();
         this.pageSize = page.getCropBox();
         
-        if (Float.compare(pageSize.getLowerLeftX(), 0) == 0 && Float.compare(pageSize.getLowerLeftY(), 0) == 0)
+        if (Double.compare(pageSize.getLowerLeftX(), 0) == 0 && Double.compare(pageSize.getLowerLeftY(), 0) == 0)
         {
             translateMatrix = null;
         }
@@ -269,7 +269,7 @@ class LegacyPDFStreamEngine extends PDFStreamEngine
         float spaceWidthDisplay = spaceWidthText * textRenderingMatrix.getScalingFactorX();
 
         // use our additional glyph list for Unicode mapping
-        String unicode = new String(new char[] { (char) code });//font.toUnicode(code, null);//GLYPHLIST);
+        String unicode = font.toUnicode(code, GLYPHLIST);
 
         // when there is no Unicode mapping available, Acrobat simply coerces the character code
         // into Unicode, so we do the same. Subclasses of PDFStreamEngine don't necessarily want

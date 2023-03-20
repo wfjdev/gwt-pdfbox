@@ -16,6 +16,7 @@
  */
 package dev.wfj.gwtpdfbox.pdfparser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -31,7 +32,6 @@ import elemental2.dom.DomGlobal;
 
 public class PDFParser extends COSParser
 {
-
     /**
      * Constructor.
      * Unrestricted main memory will be used for buffering PDF streams.
@@ -94,19 +94,7 @@ public class PDFParser extends COSParser
 
     private void init(StreamCacheCreateFunction streamCacheCreateFunction)
     {
-        /*String eofLookupRangeStr = System.getProperty(SYSPROP_EOFLOOKUPRANGE);
-        if (eofLookupRangeStr != null)
-        {
-            try
-            {
-                setEOFLookupRange(Integer.parseInt(eofLookupRangeStr));
-            }
-            catch (NumberFormatException nfe)
-            {
-                DomGlobal.console.warn("System property " + SYSPROP_EOFLOOKUPRANGE
-                        + " does not contain an integer value, but: '" + eofLookupRangeStr + "'");
-            }
-        }*/
+        setEOFLookupRange(COSParser.DEFAULT_TRAIL_BYTECOUNT);
         document = new COSDocument(streamCacheCreateFunction, this);
     }
     
@@ -202,7 +190,44 @@ public class PDFParser extends COSParser
      */
     protected PDDocument createDocument() throws IOException
     {
-        return new PDDocument(document, source);//getAccessPermission());
+        return new PDDocument(document, source);//, getAccessPermission());
     }
+
+    /**
+     * Parses a PDF. Unrestricted main memory will be used for buffering PDF streams.
+     * 
+     * @param file file to be loaded
+     * 
+     * @return loaded document
+     * 
+     * @throws InvalidPasswordException If the file required a non-empty password.
+     * @throws IOException in case of a file reading or parsing error
+     * 
+     * @deprecated use {@link Loader#loadPDF(File)} instead
+     */
+    /* @Deprecated
+    public static PDDocument load(File file) throws IOException
+    {
+        return Loader.loadPDF(file);
+    } */
+
+    /**
+     * Parses a PDF. Unrestricted main memory will be used for buffering PDF streams.
+     * 
+     * @param file file to be loaded
+     * @param password password to be used for decryption
+     * 
+     * @return loaded document
+     * 
+     * @throws InvalidPasswordException If the password is incorrect.
+     * @throws IOException in case of a file reading or parsing error
+     * 
+     * @deprecated use {@link Loader#loadPDF(File, String)} instead
+     */
+    /* @Deprecated
+    public static PDDocument load(File file, String password) throws IOException
+    {
+        return Loader.loadPDF(file, password);
+    } */
 
 }

@@ -374,7 +374,7 @@ public class PDCIDFontType2 extends PDCIDFont
 
         if (cid == 0)
         {
-            throw new IllegalArgumentException("No glyph for U+"+unicode+"X in font "+getName());
+            throw new IllegalArgumentException("No glyph for U+"+unicode+"X ("+((char) unicode)+")in font "+getName());
         }
 
         return encodeGlyphId(cid);

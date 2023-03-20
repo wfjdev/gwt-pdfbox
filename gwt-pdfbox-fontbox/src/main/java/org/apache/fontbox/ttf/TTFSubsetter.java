@@ -17,7 +17,7 @@
 package org.apache.fontbox.ttf;
 
 import java.io.ByteArrayOutputStream;
-//import java.io.DataOutputStream;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,13 +31,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import elemental2.dom.DomGlobal;
+
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import java.util.TimeZone;
+//import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import elemental2.dom.DomGlobal;
 
 /**
  * Subsetter for TrueType (TTF) fonts.
@@ -48,8 +50,7 @@ import elemental2.dom.DomGlobal;
  * @author Wolfgang Glas
  */
 public final class TTFSubsetter
-{
-        
+{    
     private static final byte[] PAD_BUF = new byte[] { 0, 0, 0 };
 
     private final TrueTypeFont ttf;
@@ -158,7 +159,7 @@ public final class TTFSubsetter
      * @return The file offset of the first TTF table to write.
      * @throws IOException Upon errors.
      */
-    /* private long writeFileHeader(DataOutputStream out, int nTables) throws IOException
+    private long writeFileHeader(DataOutputStream out, int nTables) throws IOException
     {
         out.writeInt(0x00010000);
         out.writeShort(nTables);
@@ -188,7 +189,7 @@ public final class TTFSubsetter
         }
         checksum &= 0xffffffffL;
 
-        byte[] tagbytes = tag.getBytes();//Charset.forName("US-ASCII"));
+        byte[] tagbytes = tag.getBytes(Charset.forName("US-ASCII"));
 
         out.write(tagbytes, 0, 4);
         out.writeInt((int)checksum);
@@ -221,8 +222,8 @@ public final class TTFSubsetter
         writeUint32(out, h.getMagicNumber());
         writeUint16(out, h.getFlags());
         writeUint16(out, h.getUnitsPerEm());
-        //writeLongDateTime(out, h.getCreated());
-        //writeLongDateTime(out, h.getModified());
+        writeLongDateTime(out);//, h.getCreated());
+        writeLongDateTime(out);//, h.getModified());
         writeSInt16(out, h.getXMin());
         writeSInt16(out, h.getYMin());
         writeSInt16(out, h.getXMax());
@@ -317,7 +318,7 @@ public final class TTFSubsetter
                 if (platform == CmapTable.PLATFORM_WINDOWS &&
                     encoding == CmapTable.ENCODING_WIN_UNICODE_BMP)
                 {
-                    charset = Charset.forName("UTF-16BE");
+                    charset = StandardCharsets.UTF_8;
                 }
                 else if (platform == 2) // ISO [deprecated]=
                 {
@@ -328,7 +329,7 @@ public final class TTFSubsetter
                     else if (encoding == 1) // ISO 10646=
                     {
                         //not sure is this is correct??
-                        charset = Charset.forName("UTF-16")BE;
+                        charset = StandardCharsets.UTF_8;
                     }
                 }
                 String value = nameRecord.getString();
@@ -432,7 +433,7 @@ public final class TTFSubsetter
         writeUint32(out, 0);
         writeUint32(out, 0);
 
-        out.write(os2.getAchVendId().getBytes());
+        out.write(os2.getAchVendId().getBytes(Charset.forName("US-ASCII")));
 
         writeUint16(out, os2.getFsSelection());
         writeUint16(out, uniToGID.firstKey());
@@ -460,7 +461,7 @@ public final class TTFSubsetter
 
         out.flush();
         return bos.toByteArray();
-    } */
+    }
 
     /**
      * Resolve compound glyph references.
@@ -709,7 +710,7 @@ public final class TTFSubsetter
         return glyphIds.headSet(oldGid).size();
     }
 
-    /* private byte[] buildCmapTable() throws IOException
+    private byte[] buildCmapTable() throws IOException
     {
         if (ttf.getCmap() == null || uniToGID.isEmpty()
                 || keepTables != null && !keepTables.contains(CmapTable.TAG))
@@ -826,9 +827,9 @@ public final class TTFSubsetter
         }
 
         return bos.toByteArray();
-    } */
+    }
 
-    /* private byte[] buildPostTable() throws IOException
+    private byte[] buildPostTable() throws IOException
     {
         PostScriptTable post = ttf.getPostScript();
         if (post == null || keepTables != null && !keepTables.contains(PostScriptTable.TAG))
@@ -876,14 +877,14 @@ public final class TTFSubsetter
         // names[numberNewGlyphs]
         for (String name : names.keySet())
         {
-            byte[] buf = name.getBytes();//Charset.forName("US-ASCII"));
+            byte[] buf = name.getBytes(Charset.forName("US-ASCII"));
             writeUint8(out, buf.length);
             out.write(buf);
         }
 
         out.flush();
         return bos.toByteArray();
-    } */
+    }
 
     private byte[] buildHmtxTable() throws IOException
     {
@@ -970,7 +971,7 @@ public final class TTFSubsetter
      * @throws IOException if something went wrong.
      * @throws IllegalStateException if the subset is empty.
      */
-    /* public void writeToStream(OutputStream os) throws IOException
+    public void writeToStream(OutputStream os) throws IOException
     {
         if (glyphIds.isEmpty() && uniToGID.isEmpty())
         {
@@ -1080,18 +1081,19 @@ public final class TTFSubsetter
     private void writeUint8(DataOutputStream out, int i) throws IOException
     {
         out.writeByte(i);
-    } */
+    }
 
-    /* private void writeLongDateTime(DataOutputStream out, Calendar calendar) throws IOException
+    private void writeLongDateTime(DataOutputStream out)//, Calendar calendar) 
+    throws IOException
     {
         // inverse operation of TTFDataStream.readInternationalDate()
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.set(1904, 0, 1, 0, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        long millisFor1904 = cal.getTimeInMillis();
-        long secondsSince1904 = (calendar.getTimeInMillis() - millisFor1904) / 1000L;
-        out.writeLong(secondsSince1904);
-    } */
+        //Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        //cal.set(1904, 0, 1, 0, 0, 0);
+        //cal.set(Calendar.MILLISECOND, 0);
+        //long millisFor1904 = cal.getTimeInMillis();
+        //long secondsSince1904 = (calendar.getTimeInMillis() - millisFor1904) / 1000L;
+        out.writeLong(0L);
+    }
 
     private long toUInt32(int high, int low)
     {

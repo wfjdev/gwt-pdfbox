@@ -55,7 +55,6 @@ import dev.wfj.gwtpdfbox.pdmodel.font.encoding.SymbolEncoding;
  */
 public class PDType1Font extends PDSimpleFont implements PDVectorFont
 {
-    
     // alternative names for glyphs which are commonly encountered
     private static final Map<String, String> ALT_NAMES = new HashMap<>();
     private static final int PFB_START_MARKER = 0x80;
@@ -98,11 +97,7 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
      *
      * @param baseFont One of the standard 14 PostScript names, e.g. {@link FontName#HELVETICA_BOLD}.
      */
-    public PDType1Font(FontName baseFont) {
-        this(baseFont, false);
-    }
-
-    public PDType1Font(FontName baseFont, boolean load)
+    public PDType1Font(FontName baseFont)
     {
         super(baseFont);
         
@@ -121,22 +116,12 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
             dict.setItem(COSName.ENCODING, COSName.WIN_ANSI_ENCODING);
             break;
         }
-        
-        type1font = null;
-        isEmbedded = false;
-        isDamaged = false;
-        fontMatrixTransform = new AffineTransform();
-
-        if(!load) {
-            genericFont = null;
-            return;
-        }
 
         // todo: could load the PFB font here if we wanted to support Standard 14 embedding
+        type1font = null;
         FontMapping<FontBoxFont> mapping = FontMappers.instance()
                                                       .getFontBoxFont(getBaseFont(),
                                                                       getFontDescriptor());
-
         genericFont = mapping.getFont();
         
         if (mapping.isFallback())
@@ -153,6 +138,9 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
             }
             DomGlobal.console.warn("Using fallback font " + fontName + " for base font " + getBaseFont());
         }
+        isEmbedded = false;
+        isDamaged = false;
+        fontMatrixTransform = new AffineTransform();
     }
 
     /**
@@ -412,25 +400,25 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
             // this is important on systems with no installed fonts
             if (!encoding.contains(name))
             {
-                throw new IllegalArgumentException("U+"+unicode+"X  is not available in the font "+name+", encoding: "+ encoding.getEncodingName());
+                throw new IllegalArgumentException("U+"+unicode+"X ('"+name+"') is not available in the font "+getName()+", encoding: "+encoding.getEncodingName());
             }
             if (".notdef".equals(name))
             {
-                throw new IllegalArgumentException("No glyph for U+"+unicode+"X in the font");
+                throw new IllegalArgumentException("No glyph for U+"+unicode+"X in the font "+getName());
             }
         }
         else
         {
             if (!encoding.contains(name))
             {
-                throw new IllegalArgumentException("U+"+unicode+"X is not available in the font");
+                throw new IllegalArgumentException("U+"+unicode+"X ('"+name+"') is not available in the font "+getName()+" (genertic: "+genericFont.getName()+"), encoding: "+encoding.getEncodingName());
             }
 
             String nameInFont = getNameInFont(name);
 
             if (".notdef".equals(nameInFont) || !genericFont.hasGlyph(nameInFont))
             {
-                throw new IllegalArgumentException("No glyph for U+"+unicode+"X in the font");
+                throw new IllegalArgumentException("No glyph for U+"+unicode+"X in the font "+getName()+" (genertic: "+genericFont.getName()+")");
             }
         }
 
@@ -438,7 +426,7 @@ public class PDType1Font extends PDSimpleFont implements PDVectorFont
         int code = inverted.get(name);
         if (code < 0)
         {
-            throw new IllegalArgumentException("U+"+unicode+"X is not available in the font");
+            throw new IllegalArgumentException("U+"+unicode+"X ('"+name+"') is not available in the font "+getName()+" (genertic: "+genericFont.getName()+"), encoding: "+encoding.getEncodingName());
         }
         bytes = new byte[] { (byte)code };
         codeToBytesMap.put(unicode, bytes);

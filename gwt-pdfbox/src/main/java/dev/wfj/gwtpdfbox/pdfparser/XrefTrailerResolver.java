@@ -26,11 +26,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import elemental2.dom.DomGlobal;
-
 import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.cos.COSObjectKey;
+import elemental2.dom.DomGlobal;
 
 /**
  * This class will collect all XRef/trailer objects and creates correct
@@ -98,6 +97,7 @@ public class XrefTrailerResolver
     private final Map<Long, XrefTrailerObj> bytePosToXrefMap = new HashMap<>();
     private XrefTrailerObj curXrefTrailerObj   = null;
     private XrefTrailerObj resolvedXrefTrailer = null;
+
 
     /**
      * Returns the first trailer if at least one exists.

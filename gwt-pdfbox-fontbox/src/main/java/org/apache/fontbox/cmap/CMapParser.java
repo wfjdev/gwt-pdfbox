@@ -16,6 +16,7 @@
  */
 package org.apache.fontbox.cmap;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +25,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.google.gwt.resources.client.TextResource;
 
 import dev.wfj.gwtpdfbox.io.RandomAccessRead;
 import dev.wfj.gwtpdfbox.io.RandomAccessReadBuffer;
@@ -41,6 +44,12 @@ public class CMapParser
     private final byte[] tokenParserByteBuffer = new byte[512];
 
     private boolean strictMode = false;
+
+    private static final Map<String, TextResource> cMapMap = new HashMap<>();
+
+    static {
+        cMapMap.put("Identity-H", GwtCMapResources.INSTANCE.identityH());
+    }
 
     /**
      * Creates a new instance of CMapParser.
@@ -66,7 +75,7 @@ public class CMapParser
      * @return The parsed predefined CMap as a java object, never null.
      * @throws IOException If the CMap could not be parsed.
      */
-    /* public CMap parsePredefined(String name) throws IOException
+    public CMap parsePredefined(String name) throws IOException
     {
         try (RandomAccessRead randomAccessRead = getExternalCMap(name))
         {
@@ -74,7 +83,7 @@ public class CMapParser
             strictMode = false;
             return parse(randomAccessRead);
         }
-    } */
+    }
 
     /**
      * This will parse the stream and create a cmap object.
@@ -101,7 +110,7 @@ public class CMapParser
 
                 if (op.op.equals("usecmap") && previousToken instanceof LiteralName)
                 {
-                    //parseUsecmap((LiteralName) previousToken, result);
+                    parseUsecmap((LiteralName) previousToken, result);
                 }
                 else if (previousToken instanceof Number)
                 {
@@ -137,14 +146,14 @@ public class CMapParser
         return result;
     }
 
-    /* private void parseUsecmap(LiteralName useCmapName, CMap result) throws IOException
+    private void parseUsecmap(LiteralName useCmapName, CMap result) throws IOException
     {
         try (RandomAccessRead randomAccessRead = getExternalCMap(useCmapName.name))
         {
             CMap useCMap = parse(randomAccessRead);
             result.useCmap(useCMap);
         }
-    } */
+    }
 
     private void parseLiteralName(LiteralName literal, RandomAccessRead randomAcccessRead,
             CMap result) throws IOException
@@ -473,15 +482,14 @@ public class CMapParser
      * @param name Name of the given "use" CMap resource.
      * @throws IOException if the CMap resource doesn't exist or if there is an error opening it.
      */
-    /* private RandomAccessRead getExternalCMap(String name) throws IOException
+    private RandomAccessRead getExternalCMap(String name) throws IOException
     {
-        InputStream is = getClass().getResourceAsStream(name);
-        if (is == null)
-        {
-            throw new IOException("Error: Could not find referenced cmap stream " + name);
+        TextResource cmapResoure = cMapMap.get(name);
+        if (cmapResoure == null) throw new IOException("Error: Could not find referenced cmap stream " + name);
+        try(ByteArrayInputStream is = new ByteArrayInputStream(cmapResoure.getText().getBytes())) {
+            return new RandomAccessReadBuffer(is);
         }
-        return new RandomAccessReadBuffer(is);
-    } */
+    }
 
     private Object parseNextToken(RandomAccessRead randomAcccessRead) throws IOException
     {
@@ -626,16 +634,16 @@ public class CMapParser
 
         // newline separator may be missing in malformed CMap files
         // see PDFBOX-2035
-       /* while (!isWhitespaceOrEOF(nextByte) && !isDelimiter(nextByte)
-                && !Character.isDigit(nextByte))
+        while (!isWhitespaceOrEOF(nextByte) && !isDelimiter(nextByte)
+                && !Character.isDigit((char)nextByte))
         {
             buffer.append((char) nextByte);
             nextByte = randomAcccessRead.read();
         }
-        if (isDelimiter(nextByte) || Character.isDigit(nextByte))
+        if (isDelimiter(nextByte) || Character.isDigit((char)nextByte))
         {
             randomAcccessRead.rewind(1);
-        }*/
+        }
         return new Operator(buffer.toString());
     }
     
@@ -646,12 +654,12 @@ public class CMapParser
         buffer.append((char) nextByte);
         nextByte = randomAcccessRead.read();
 
-        /*while (!isWhitespaceOrEOF(nextByte)
+        while (!isWhitespaceOrEOF(nextByte)
                 && (Character.isDigit((char) nextByte) || nextByte == '.'))
         {
             buffer.append((char) nextByte);
             nextByte = randomAcccessRead.read();
-        }*/
+        }
         randomAcccessRead.rewind(1);
         String value = buffer.toString();
         try
@@ -804,8 +812,7 @@ public class CMapParser
 
     private String createStringFromBytes(byte[] bytes)
     {
-        return new String(bytes, StandardCharsets.ISO_8859_1);
-        //return new String(bytes, bytes.length == 1 ? StandardCharsets.ISO_8859_1 : Charset.forName("UTF-16")BE);
+        return new String(bytes, bytes.length == 1 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_8);
     }
 
     /**

@@ -27,6 +27,7 @@ import dev.wfj.gwtpdfbox.cos.COSDictionary;
 public final class DecodeResult
 {
     private final COSDictionary parameters;
+    //private PDJPXColorSpace colorSpace;
 
     DecodeResult(COSDictionary parameters)
     {
@@ -51,4 +52,19 @@ public final class DecodeResult
     {
         return parameters;
     }
+
+    /**
+     * Returns the embedded JPX color space, if any.
+     * @return the embedded JPX color space, or null if there is none.
+     */
+    /* public PDJPXColorSpace getJPXColorSpace()
+    {
+        return colorSpace;
+    }
+
+    // Sets the JPX color space
+    void setColorSpace(PDJPXColorSpace colorSpace)
+    {
+        this.colorSpace = colorSpace;
+    } */
 }

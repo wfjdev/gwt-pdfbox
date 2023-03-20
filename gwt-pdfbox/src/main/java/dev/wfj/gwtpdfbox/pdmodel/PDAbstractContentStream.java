@@ -16,13 +16,47 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel;
 
+import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import org.apache.fontbox.ttf.CmapLookup;
+//import org.apache.fontbox.ttf.gsub.CompoundCharacterTokenizer;
+import org.apache.fontbox.ttf.gsub.GsubWorker;
+import org.apache.fontbox.ttf.gsub.GsubWorkerFactory;
+import org.apache.fontbox.ttf.model.GsubData;
 import dev.wfj.gwtpdfbox.contentstream.operator.OperatorName;
+import dev.wfj.gwtpdfbox.cos.COSArray;
+import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSName;
+import dev.wfj.gwtpdfbox.cos.COSNumber;
+import dev.wfj.gwtpdfbox.pdfwriter.COSWriter;
+import dev.wfj.gwtpdfbox.pdmodel.documentinterchange.markedcontent.PDPropertyList;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFont;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDType0Font;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDColor;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDColorSpace;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDDeviceCMYK;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDDeviceGray;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.color.PDDeviceRGB;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.state.PDExtendedGraphicsState;
 import dev.wfj.gwtpdfbox.pdmodel.graphics.state.RenderingMode;
+import dev.wfj.gwtpdfbox.util.Matrix;
 import dev.wfj.gwtpdfbox.util.NumberFormatUtil;
 import elemental2.dom.DomGlobal;
 
@@ -33,16 +67,23 @@ import elemental2.dom.DomGlobal;
  */
 abstract class PDAbstractContentStream implements Closeable
 {
-    
     protected final PDDocument document; // may be null
 
     protected final OutputStream outputStream;
     protected final PDResources resources;
 
     protected boolean inTextMode = false;
+    protected final Deque<PDFont> fontStack = new ArrayDeque<>();
+
+    protected final Deque<PDColorSpace> nonStrokingColorSpaceStack = new ArrayDeque<>();
+    protected final Deque<PDColorSpace> strokingColorSpaceStack = new ArrayDeque<>();
 
     // number format
+    //private final NumberFormat formatDecimal = NumberFormat.getNumberInstance(Locale.US);
     private final byte[] formatBuffer = new byte[32];
+
+    private final Map<PDType0Font, GsubWorker> gsubWorkers = new HashMap<>();
+    private final GsubWorkerFactory gsubWorkerFactory = new GsubWorkerFactory();
 
     /**
      * Create a new appearance stream.
@@ -56,6 +97,20 @@ abstract class PDAbstractContentStream implements Closeable
         this.document = document;
         this.outputStream = outputStream;
         this.resources = resources;
+
+        //formatDecimal.setMaximumFractionDigits(4);
+        //formatDecimal.setGroupingUsed(false);
+    }
+
+    /**
+     * Sets the maximum number of digits allowed for fractional numbers.
+     * 
+     * @see NumberFormat#setMaximumFractionDigits(int)
+     * @param fractionDigitsNumber
+     */
+    protected void setMaximumFractionDigits(int fractionDigitsNumber)
+    {
+        //formatDecimal.setMaximumFractionDigits(fractionDigitsNumber);
     }
 
     /**
@@ -92,6 +147,60 @@ abstract class PDAbstractContentStream implements Closeable
         inTextMode = false;
     }
     
+    /**
+     * Set the font and font size to draw text with.
+     *
+     * @param font The font to use.
+     * @param fontSize The font size to draw the text.
+     * @throws IOException If there is an error writing the font information.
+     */
+    public void setFont(PDFont font, float fontSize) throws IOException
+    {
+        if (fontStack.isEmpty())
+        {
+            fontStack.add(font);
+        }
+        else
+        {
+            fontStack.pop();
+            fontStack.push(font);
+        }
+
+        // keep track of fonts which are configured for subsetting
+        if (font.willBeSubset())
+        {
+            if (document != null)
+            {
+                document.getFontsToSubset().add(font);
+            }
+            else
+            {
+                DomGlobal.console.warn("Using the subsetted font '" + font.getName() +
+                        "' without a PDDocument context; call subset() before saving");
+            }
+        }
+        else if (!font.isEmbedded() && !font.isStandard14())
+        {
+            DomGlobal.console.warn("attempting to use font '" + font.getName() + "' that isn't embedded");
+        }
+
+        // complex text layout
+        if (font instanceof PDType0Font)
+        {
+            PDType0Font pdType0Font = (PDType0Font) font;
+            GsubData gsubData = pdType0Font.getGsubData();
+            if (gsubData != GsubData.NO_DATA_FOUND)
+            {
+                GsubWorker gsubWorker = gsubWorkerFactory.getGsubWorker(pdType0Font.getCmapLookup(),
+                        gsubData);
+                gsubWorkers.put((PDType0Font) font, gsubWorker);
+            }
+        }
+
+        writeOperand(resources.add(font));
+        writeOperand(fontSize);
+        writeOperator(OperatorName.SET_FONT_AND_SIZE);
+    }
 
     /**
      * Shows the given text at the location specified by the current text matrix with the given
@@ -156,6 +265,48 @@ abstract class PDAbstractContentStream implements Closeable
             throw new IllegalStateException("Must call beginText() before showText()");
         }
 
+        if (fontStack.isEmpty())
+        {
+            throw new IllegalStateException("Must call setFont() before showText()");
+        }
+
+        PDFont font = fontStack.peek();
+
+        // complex text layout
+        byte[] encodedText = null;
+        if (font instanceof PDType0Font)
+        {
+            GsubWorker gsubWorker = gsubWorkers.get(font);
+            if (gsubWorker != null)
+            {
+                PDType0Font pdType0Font = (PDType0Font) font;
+                Set<Integer> glyphIds = new HashSet<>();
+                //encodedText = encodeForGsub(gsubWorker, glyphIds, pdType0Font, text);
+                if (pdType0Font.willBeSubset())
+                {
+                    pdType0Font.addGlyphsToSubset(glyphIds);
+                }
+            }
+        }
+
+        if (encodedText == null)
+        {
+            encodedText = font.encode(text);
+        }
+
+        // Unicode code points to keep when subsetting
+        if (font.willBeSubset())
+        {
+            int offset = 0;
+            while (offset < text.length())
+            {
+                int codePoint = text.codePointAt(offset);
+                font.addToSubset(codePoint);
+                offset += Character.charCount(codePoint);
+            }
+        }
+
+        COSWriter.writeString(encodedText, outputStream);
     }
 
     /**
@@ -205,6 +356,216 @@ abstract class PDAbstractContentStream implements Closeable
         writeOperator(OperatorName.MOVE_TEXT);
     }
 
+    /**
+     * The Tm operator. Sets the text matrix to the given values.
+     * A current text matrix will be replaced with the new one.
+     *
+     * @param matrix the transformation matrix
+     * @throws IOException If there is an error writing to the stream.
+     * @throws IllegalStateException If the method was not allowed to be called at this time.
+     */
+    public void setTextMatrix(Matrix matrix) throws IOException
+    {
+        if (!inTextMode)
+        {
+            throw new IllegalStateException("Error: must call beginText() before setTextMatrix");
+        }
+        writeAffineTransform(matrix.createAffineTransform());
+        writeOperator(OperatorName.SET_MATRIX);
+    }
+
+    /**
+     * Draw an image at the x,y coordinates, with the default size of the image.
+     *
+     * @param image The image to draw.
+     * @param x The x-coordinate to draw the image.
+     * @param y The y-coordinate to draw the image.
+     *
+     * @throws IOException If there is an error writing to the stream.
+     */
+    /* public void drawImage(PDImageXObject image, float x, float y) throws IOException
+    {
+        drawImage(image, x, y, image.getWidth(), image.getHeight());
+    } */
+
+    /**
+     * Draw an image at the x,y coordinates, with the given size.
+     *
+     * @param image The image to draw.
+     * @param x The x-coordinate to draw the image.
+     * @param y The y-coordinate to draw the image.
+     * @param width The width to draw the image.
+     * @param height The height to draw the image.
+     *
+     * @throws IOException If there is an error writing to the stream.
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    /* public void drawImage(PDImageXObject image, float x, float y, float width, float height) throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException("Error: drawImage is not allowed within a text block.");
+        }
+
+        saveGraphicsState();
+
+        AffineTransform transform = new AffineTransform(width, 0, 0, height, x, y);
+        transform(new Matrix(transform));
+
+        writeOperand(resources.add(image));
+        writeOperator(OperatorName.DRAW_OBJECT);
+
+        restoreGraphicsState();
+    } */
+
+    /**
+     * Draw an image at the origin with the given transformation matrix.
+     *
+     * @param image The image to draw.
+     * @param matrix The transformation matrix to apply to the image.
+     *
+     * @throws IOException If there is an error writing to the stream.
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    /* public void drawImage(PDImageXObject image, Matrix matrix) throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException("Error: drawImage is not allowed within a text block.");
+        }
+
+        saveGraphicsState();
+
+        AffineTransform transform = matrix.createAffineTransform();
+        transform(new Matrix(transform));
+
+        writeOperand(resources.add(image));
+        writeOperator(OperatorName.DRAW_OBJECT);
+
+        restoreGraphicsState();
+    } */
+
+    /**
+     * Draw an inline image at the x,y coordinates, with the default size of the image.
+     *
+     * @param inlineImage The inline image to draw.
+     * @param x The x-coordinate to draw the inline image.
+     * @param y The y-coordinate to draw the inline image.
+     *
+     * @throws IOException If there is an error writing to the stream.
+     */
+    /* public void drawImage(PDInlineImage inlineImage, float x, float y) throws IOException
+    {
+        drawImage(inlineImage, x, y, inlineImage.getWidth(), inlineImage.getHeight());
+    } */
+
+    /**
+     * Draw an inline image at the x,y coordinates and a certain width and height.
+     *
+     * @param inlineImage The inline image to draw.
+     * @param x The x-coordinate to draw the inline image.
+     * @param y The y-coordinate to draw the inline image.
+     * @param width The width of the inline image to draw.
+     * @param height The height of the inline image to draw.
+     *
+     * @throws IOException If there is an error writing to the stream.
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    /* public void drawImage(PDInlineImage inlineImage, float x, float y, float width, float height) throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException("Error: drawImage is not allowed within a text block.");
+        }
+
+        saveGraphicsState();
+        transform(new Matrix(width, 0, 0, height, x, y));
+
+        // create the image dictionary
+        StringBuilder sb = new StringBuilder();
+        sb.append(OperatorName.BEGIN_INLINE_IMAGE);
+
+        sb.append("\n /W ");
+        sb.append(inlineImage.getWidth());
+
+        sb.append("\n /H ");
+        sb.append(inlineImage.getHeight());
+
+        sb.append("\n /CS ");
+        sb.append('/');
+        sb.append(inlineImage.getColorSpace().getName());
+
+        COSArray decodeArray = inlineImage.getDecode();
+        if (decodeArray != null && decodeArray.size() > 0)
+        {
+            sb.append("\n /D ");
+            sb.append('[');
+            for (COSBase base : decodeArray)
+            {
+                sb.append(((COSNumber) base).intValue());
+                sb.append(' ');
+            }
+            sb.append(']');
+        }
+
+        if (inlineImage.isStencil())
+        {
+            sb.append("\n /IM true");
+        }
+
+        sb.append("\n /BPC ");
+        sb.append(inlineImage.getBitsPerComponent());
+
+        // image dictionary
+        write(sb.toString());
+        writeLine();
+
+        // binary data
+        writeOperator(OperatorName.BEGIN_INLINE_IMAGE_DATA);
+        writeBytes(inlineImage.getData());
+        writeLine();
+        writeOperator(OperatorName.END_INLINE_IMAGE);
+
+        restoreGraphicsState();
+    } */
+
+    /**
+     * Draws the given Form XObject at the current location.
+     *
+     * @param form Form XObject
+     * @throws IOException if the content stream could not be written
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    /* public void drawForm(PDFormXObject form) throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException("Error: drawForm is not allowed within a text block.");
+        }
+
+        writeOperand(resources.add(form));
+        writeOperator(OperatorName.DRAW_OBJECT);
+    } */
+
+    /**
+     * The cm operator. Concatenates the given matrix with the current transformation matrix (CTM),
+     * which maps user space coordinates used within a PDF content stream into output device
+     * coordinates. More details on coordinates can be found in the PDF 32000 specification, 8.3.2
+     * Coordinate Spaces.
+     *
+     * @param matrix the transformation matrix
+     * @throws IOException If there is an error writing to the stream.
+     */
+    public void transform(Matrix matrix) throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException("Error: Modifying the current transformation matrix is not allowed within text objects.");
+        }
+
+        writeAffineTransform(matrix.createAffineTransform());
+        writeOperator(OperatorName.CONCAT);
+    }
 
     /**
      * q operator. Saves the current graphics state.
@@ -217,6 +578,18 @@ abstract class PDAbstractContentStream implements Closeable
             throw new IllegalStateException("Error: Saving the graphics state is not allowed within text objects.");
         }
 
+        if (!fontStack.isEmpty())
+        {
+            fontStack.push(fontStack.peek());
+        }
+        if (!strokingColorSpaceStack.isEmpty())
+        {
+            strokingColorSpaceStack.push(strokingColorSpaceStack.peek());
+        }
+        if (!nonStrokingColorSpaceStack.isEmpty())
+        {
+            nonStrokingColorSpaceStack.push(nonStrokingColorSpaceStack.peek());
+        }
         writeOperator(OperatorName.SAVE);
     }
 
@@ -230,9 +603,88 @@ abstract class PDAbstractContentStream implements Closeable
         {
             throw new IllegalStateException("Error: Restoring the graphics state is not allowed within text objects.");
         }
+
+        if (!fontStack.isEmpty())
+        {
+            fontStack.pop();
+        }
+        if (!strokingColorSpaceStack.isEmpty())
+        {
+            strokingColorSpaceStack.pop();
+        }
+        if (!nonStrokingColorSpaceStack.isEmpty())
+        {
+            nonStrokingColorSpaceStack.pop();
+        }
         writeOperator(OperatorName.RESTORE);
     }
 
+    protected COSName getName(PDColorSpace colorSpace)
+    {
+        if (colorSpace instanceof PDDeviceGray ||
+            colorSpace instanceof PDDeviceRGB ||
+            colorSpace instanceof PDDeviceCMYK)
+        {
+            return COSName.getPDFName(colorSpace.getName());
+        }
+        else
+        {
+            return resources.add(colorSpace);
+        }
+    }
+
+    /**
+     * Sets the stroking color and, if necessary, the stroking color space.
+     *
+     * @param color Color in a specific color space.
+     * @throws IOException If an IO error occurs while writing to the stream.
+     */
+    /* public void setStrokingColor(PDColor color) throws IOException
+    {
+        if (strokingColorSpaceStack.isEmpty() ||
+            strokingColorSpaceStack.peek() != color.getColorSpace())
+        {
+            writeOperand(getName(color.getColorSpace()));
+            writeOperator(OperatorName.STROKING_COLORSPACE);
+            setStrokingColorSpaceStack(color.getColorSpace());
+        }
+
+        for (float value : color.getComponents())
+        {
+            writeOperand(value);
+        }
+
+        if (color.getColorSpace() instanceof PDPattern)
+        {
+            writeOperand(color.getPatternName());
+        }
+
+        if (color.getColorSpace() instanceof PDPattern ||
+            color.getColorSpace() instanceof PDSeparation ||
+            color.getColorSpace() instanceof PDDeviceN ||
+            color.getColorSpace() instanceof PDICCBased)
+        {
+            writeOperator(OperatorName.STROKING_COLOR_N);
+        }
+        else
+        {
+            writeOperator(OperatorName.STROKING_COLOR);
+        }
+    } */
+
+    /**
+     * Set the stroking color using an AWT color. Conversion uses the default sRGB color space.
+     *
+     * @param color The color to set.
+     * @throws IOException If an IO error occurs while writing to the stream.
+     */
+    /* public void setStrokingColor(Color color) throws IOException
+    {
+        float[] components = new float[] {
+                color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f };
+        PDColor pdColor = new PDColor(components, PDDeviceRGB.INSTANCE);
+        setStrokingColor(pdColor);
+    } */
 
     /**
      * Set the stroking color in the DeviceRGB color space. Range is 0..1.
@@ -243,17 +695,19 @@ abstract class PDAbstractContentStream implements Closeable
      * @throws IOException If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
-    public void setStrokingColor(float r, float g, float b) throws IOException
+    /* public void setStrokingColor(float r, float g, float b) throws IOException
     {
         if (isOutsideOneInterval(r) || isOutsideOneInterval(g) || isOutsideOneInterval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1");
+            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
+                    + String.format("(%.2f,%.2f,%.2f)", r, g, b));
         }
         writeOperand(r);
         writeOperand(g);
         writeOperand(b);
         writeOperator(OperatorName.STROKING_COLOR_RGB);
-    }
+        setStrokingColorSpaceStack(PDDeviceRGB.INSTANCE);
+    } */
 
     /**
      * Set the stroking color in the DeviceCMYK color space. Range is 0..1
@@ -265,18 +719,19 @@ abstract class PDAbstractContentStream implements Closeable
      * @throws IOException If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
-    public void setStrokingColor(float c, float m, float y, float k) throws IOException
+    /* public void setStrokingColor(float c, float m, float y, float k) throws IOException
     {
         if (isOutsideOneInterval(c) || isOutsideOneInterval(m) || isOutsideOneInterval(y) || isOutsideOneInterval(k))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1");
+            throw new IllegalArgumentException("Parameters must be within 0..1, but are "+ String.format("(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
         }
         writeOperand(c);
         writeOperand(m);
         writeOperand(y);
         writeOperand(k);
         writeOperator(OperatorName.STROKING_COLOR_CMYK);
-    }
+        setStrokingColorSpaceStack(PDDeviceCMYK.INSTANCE);
+    } */
 
     /**
      * Set the stroking color in the DeviceGray color space. Range is 0..1.
@@ -293,7 +748,61 @@ abstract class PDAbstractContentStream implements Closeable
         }
         writeOperand(g);
         writeOperator(OperatorName.STROKING_COLOR_GRAY);
+        setStrokingColorSpaceStack(PDDeviceGray.INSTANCE);
     }
+
+    /**
+     * Sets the non-stroking color and, if necessary, the non-stroking color space.
+     *
+     * @param color Color in a specific color space.
+     * @throws IOException If an IO error occurs while writing to the stream.
+     */
+    /* public void setNonStrokingColor(PDColor color) throws IOException
+    {
+        if (nonStrokingColorSpaceStack.isEmpty() ||
+            nonStrokingColorSpaceStack.peek() != color.getColorSpace())
+        {
+            writeOperand(getName(color.getColorSpace()));
+            writeOperator(OperatorName.NON_STROKING_COLORSPACE);
+            setNonStrokingColorSpaceStack(color.getColorSpace());
+        }
+
+        for (float value : color.getComponents())
+        {
+            writeOperand(value);
+        }
+
+        if (color.getColorSpace() instanceof PDPattern)
+        {
+            writeOperand(color.getPatternName());
+        }
+
+        if (color.getColorSpace() instanceof PDPattern ||
+            color.getColorSpace() instanceof PDSeparation ||
+            color.getColorSpace() instanceof PDDeviceN ||
+            color.getColorSpace() instanceof PDICCBased)
+        {
+            writeOperator(OperatorName.NON_STROKING_COLOR_N);
+        }
+        else
+        {
+            writeOperator(OperatorName.NON_STROKING_COLOR);
+        }
+    } */
+
+    /**
+     * Set the non-stroking color using an AWT color. Conversion uses the default sRGB color space.
+     *
+     * @param color The color to set.
+     * @throws IOException If an IO error occurs while writing to the stream.
+     */
+    /* public void setNonStrokingColor(Color color) throws IOException
+    {
+        float[] components = new float[] {
+                color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f };
+        PDColor pdColor = new PDColor(components, PDDeviceRGB.INSTANCE);
+        setNonStrokingColor(pdColor);
+    } */
 
     /**
      * Set the non-stroking color in the DeviceRGB color space. Range is 0..1.
@@ -304,17 +813,19 @@ abstract class PDAbstractContentStream implements Closeable
      * @throws IOException If an IO error occurs while writing to the stream.
      * @throws IllegalArgumentException If the parameters are invalid.
      */
-    public void setNonStrokingColor(float r, float g, float b) throws IOException
+    /* public void setNonStrokingColor(float r, float g, float b) throws IOException
     {
         if (isOutsideOneInterval(r) || isOutsideOneInterval(g) || isOutsideOneInterval(b))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1");
+            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
+                    + String.format("(%.2f,%.2f,%.2f)", r, g, b));
         }
         writeOperand(r);
         writeOperand(g);
         writeOperand(b);
         writeOperator(OperatorName.NON_STROKING_RGB);
-    }
+        setNonStrokingColorSpaceStack(PDDeviceRGB.INSTANCE);
+    } */
 
     /**
      * Set the non-stroking color in the DeviceCMYK color space. Range is 0..1.
@@ -325,18 +836,20 @@ abstract class PDAbstractContentStream implements Closeable
      * @param k The black value.
      * @throws IOException If an IO error occurs while writing to the stream.
      */
-    public void setNonStrokingColor(float c, float m, float y, float k) throws IOException
+    /* public void setNonStrokingColor(float c, float m, float y, float k) throws IOException
     {
         if (isOutsideOneInterval(c) || isOutsideOneInterval(m) || isOutsideOneInterval(y) || isOutsideOneInterval(k))
         {
-            throw new IllegalArgumentException("Parameters must be within 0..1");
+            throw new IllegalArgumentException("Parameters must be within 0..1, but are "
+                    + String.format("(%.2f,%.2f,%.2f,%.2f)", c, m, y, k));
         }
         writeOperand(c);
         writeOperand(m);
         writeOperand(y);
         writeOperand(k);
         writeOperator(OperatorName.NON_STROKING_CMYK);
-    }
+        setNonStrokingColorSpaceStack(PDDeviceCMYK.INSTANCE);
+    } */
 
     /**
      * Set the non-stroking color in the DeviceGray color space. Range is 0..1.
@@ -353,6 +866,7 @@ abstract class PDAbstractContentStream implements Closeable
         }
         writeOperand(g);
         writeOperator(OperatorName.NON_STROKING_GRAY);
+        setNonStrokingColorSpaceStack(PDDeviceGray.INSTANCE);
     }
 
     /**
@@ -621,6 +1135,24 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
+     * Fills the clipping area with the given shading.
+     *
+     * @param shading Shading resource
+     * @throws IOException If the content stream could not be written
+     * @throws IllegalStateException If the method was called within a text block.
+     */
+    /* public void shadingFill(PDShading shading) throws IOException
+    {
+        if (inTextMode)
+        {
+            throw new IllegalStateException("Error: shadingFill is not allowed within a text block.");
+        }
+
+        writeOperand(resources.add(shading));
+        writeOperator(OperatorName.SHADING_FILL);
+    } */
+
+    /**
      * Closes the current subpath.
      *
      * @throws IOException If the content stream could not be written
@@ -772,6 +1304,21 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
+     * Begin a marked content sequence with a reference to an entry in the page resources'
+     * Properties dictionary.
+     *
+     * @param tag the tag
+     * @param propertyList property list
+     * @throws IOException If the content stream could not be written
+     */
+    public void beginMarkedContent(COSName tag, PDPropertyList propertyList) throws IOException
+    {
+        writeOperand(tag);
+        writeOperand(resources.add(propertyList));
+        writeOperator(OperatorName.BEGIN_MARKED_CONTENT_SEQ);
+    }
+
+    /**
      * End a marked content sequence.
      *
      * @throws IOException If the content stream could not be written
@@ -779,6 +1326,18 @@ abstract class PDAbstractContentStream implements Closeable
     public void endMarkedContent() throws IOException
     {
         writeOperator(OperatorName.END_MARKED_CONTENT);
+    }
+
+    /**
+     * Set an extended graphics state.
+     * 
+     * @param state The extended graphics state.
+     * @throws IOException If the content stream could not be written.
+     */
+    public void setGraphicsStateParameters(PDExtendedGraphicsState state) throws IOException
+    {
+        writeOperand(resources.add(state));
+        writeOperator(OperatorName.SET_GRAPHICS_STATE_PARAMS);
     }
 
     /**
@@ -796,7 +1355,7 @@ abstract class PDAbstractContentStream implements Closeable
             throw new IllegalArgumentException("comment should not include a newline");
         }
         outputStream.write('%');
-        outputStream.write(comment.getBytes());
+        outputStream.write(comment.getBytes());//StandardCharsets.US_ASCII));
         outputStream.write('\n');
     }
 
@@ -812,17 +1371,17 @@ abstract class PDAbstractContentStream implements Closeable
         {
             throw new IllegalArgumentException(real + " is not a finite number");
         }
-        int byteCount = NumberFormatUtil.formatFloatFast(real, 5, formatBuffer);
+        //int byteCount = NumberFormatUtil.formatFloatFast(real, formatDecimal.getMaximumFractionDigits(), formatBuffer);
 
-        if (byteCount == -1)
+        /* if (byteCount == -1)
         {
             //Fast formatting failed
-            write(Float.toString(real));
+            //write(formatDecimal.format(real));
         }
         else
         {
             outputStream.write(formatBuffer, 0, byteCount);
-        }
+        } */
         outputStream.write(' ');
     }
 
@@ -833,7 +1392,7 @@ abstract class PDAbstractContentStream implements Closeable
      */
     protected void writeOperand(int integer) throws IOException
     {
-        write(Integer.toString(integer));
+        //write(formatDecimal.format(integer));
         outputStream.write(' ');
     }
 
@@ -855,7 +1414,7 @@ abstract class PDAbstractContentStream implements Closeable
      */
     protected void writeOperator(String text) throws IOException
     {
-        outputStream.write(text.getBytes());
+        outputStream.write(text.getBytes());//StandardCharsets.US_ASCII));
         outputStream.write('\n');
     }
 
@@ -866,7 +1425,7 @@ abstract class PDAbstractContentStream implements Closeable
      */
     protected void write(String text) throws IOException
     {
-        outputStream.write(text.getBytes());
+        outputStream.write(text.getBytes());//StandardCharsets.US_ASCII));
     }
 
     /**
@@ -899,6 +1458,19 @@ abstract class PDAbstractContentStream implements Closeable
     }
 
     /**
+     * Writes an AffineTransform to the content stream as an array.
+     */
+    private void writeAffineTransform(AffineTransform transform) throws IOException
+    {
+        double[] values = new double[6];
+        transform.getMatrix(values);
+        for (double v : values)
+        {
+            writeOperand((float) v);
+        }
+    }
+
+    /**
      * Close the content stream.  This must be called when you are done with this object.
      *
      * @throws IOException If the underlying stream has a problem being written to.
@@ -921,6 +1493,32 @@ abstract class PDAbstractContentStream implements Closeable
     private boolean isOutsideOneInterval(double val)
     {
         return val < 0 || val > 1;
+    }
+
+    protected void setStrokingColorSpaceStack(PDColorSpace colorSpace)
+    {
+        if (strokingColorSpaceStack.isEmpty())
+        {
+            strokingColorSpaceStack.add(colorSpace);
+        }
+        else
+        {
+            strokingColorSpaceStack.pop();
+            strokingColorSpaceStack.push(colorSpace);
+        }
+    }
+
+    protected void setNonStrokingColorSpaceStack(PDColorSpace colorSpace)
+    {
+        if (nonStrokingColorSpaceStack.isEmpty())
+        {
+            nonStrokingColorSpaceStack.add(colorSpace);
+        }
+        else
+        {
+            nonStrokingColorSpaceStack.pop();
+            nonStrokingColorSpaceStack.push(colorSpace);
+        }
     }
 
     /**
@@ -995,4 +1593,57 @@ abstract class PDAbstractContentStream implements Closeable
         writeOperator(OperatorName.SET_TEXT_RISE);
     }
 
+    /* private byte[] encodeForGsub(GsubWorker gsubWorker,
+                                 Set<Integer> glyphIds, PDType0Font font, String text) throws IOException
+    {
+        Pattern spaceRegex = Pattern.compile("\\s");
+
+        // break the entire chunk of text into words by splitting it with space
+        List<String> words = new CompoundCharacterTokenizer("\\s").tokenize(text);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        for (String word : words)
+        {
+            if (spaceRegex.matcher(word).matches())
+            {
+                out.write(font.encode(word));
+            }
+            else
+            {
+                glyphIds.addAll(applyGSUBRules(gsubWorker, out, font, word));
+            }
+        }
+
+        return out.toByteArray();
+    } */
+
+    private List<Integer> applyGSUBRules(GsubWorker gsubWorker, ByteArrayOutputStream out, PDType0Font font, String word) throws IOException
+    {
+        char[] charArray = word.toCharArray();
+        List<Integer> originalGlyphIds = new ArrayList<>(charArray.length);
+        CmapLookup cmapLookup = font.getCmapLookup();
+
+        // convert characters into glyphIds
+        for (char unicodeChar : charArray)
+        {
+            int glyphId = cmapLookup.getGlyphId(unicodeChar);
+            if (glyphId <= 0)
+            {
+                throw new IllegalStateException(
+                        "could not find the glyphId for the character: " + unicodeChar);
+            }
+            originalGlyphIds.add(glyphId);
+        }
+
+        List<Integer> glyphIdsAfterGsub = gsubWorker.applyTransforms(originalGlyphIds);
+
+        for (Integer glyphId : glyphIdsAfterGsub)
+        {
+            out.write(font.encodeGlyphId(glyphId));
+        }
+
+        return glyphIdsAfterGsub;
+
+    }
 }

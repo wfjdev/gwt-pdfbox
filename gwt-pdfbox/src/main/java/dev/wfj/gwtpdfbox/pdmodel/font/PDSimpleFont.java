@@ -290,7 +290,7 @@ public abstract class PDSimpleFont extends PDFont
         }
 
         // if no value has been produced, there is no way to obtain Unicode for the character.
-        if (/*DomGlobal.console.isWarnEnabled() && */!noUnicode.contains(code))
+        if (/* DomGlobal.console.isWarnEnabled() &&  */!noUnicode.contains(code))
         {
             // we keep track of which warnings have been issued, so we don't log multiple times
             noUnicode.add(code);

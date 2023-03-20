@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
-
 import org.apache.fontbox.FontBoxFont;
 import org.apache.fontbox.util.BoundingBox;
 import dev.wfj.gwtpdfbox.cos.COSArray;
@@ -47,10 +46,6 @@ import elemental2.dom.DomGlobal;
  */
 public class PDType3Font extends PDSimpleFont
 {
-    /**
-     * Log instance.
-     */
-    
     private PDResources resources;
     private COSDictionary charProcs;
     private Matrix fontMatrix;

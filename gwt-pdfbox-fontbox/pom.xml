@@ -34,6 +34,11 @@
       <artifactId>elemental2-dom</artifactId>
       <version>1.1.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.gwtproject</groupId>
+      <artifactId>gwt-user</artifactId>
+      <version>2.10.0</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

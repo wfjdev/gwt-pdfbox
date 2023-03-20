@@ -338,11 +338,11 @@ abstract class TrueTypeEmbedder implements Subsetter
         subsetter.setPrefix(tag);
 
         // save the subset font
-        //ByteArrayOutputStream out = new ByteArrayOutputStream();
-        //subsetter.writeToStream(out);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        subsetter.writeToStream(out);
 
         // re-build the embedded font
-        //buildSubset(new ByteArrayInputStream(out.toByteArray()), tag, gidToCid);
+        buildSubset(new ByteArrayInputStream(out.toByteArray()), tag, gidToCid);
         ttf.close();
     }
 

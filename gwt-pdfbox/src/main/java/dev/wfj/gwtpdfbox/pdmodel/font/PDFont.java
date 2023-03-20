@@ -152,7 +152,7 @@ public abstract class PDFont implements COSObjectable, PDFontLike
                         || COSName.IDENTITY_V.equals(encoding))
                 {
                     // assume that if encoding is identity, then the reverse is also true
-                    //cmap = CMapManager.getPredefinedCMap(COSName.IDENTITY_H.getName());
+                    cmap = CMapManager.getPredefinedCMap(COSName.IDENTITY_H.getName());
                     DomGlobal.console.warn("Using predefined identity CMap instead");
                 }
             }
@@ -461,6 +461,23 @@ public abstract class PDFont implements COSObjectable, PDFontLike
                 // PDFBOX-3123: do this only if the /ToUnicode entry is a name
                 // PDFBOX-4322: identity streams are OK too
                 return new String(new char[] { (char) code });
+            }
+            else
+            {
+                if (code < 256 && !(this instanceof PDType0Font))
+                {
+                    COSName encoding = dict.getCOSName(COSName.ENCODING);
+                    if (encoding != null && !encoding.getName().startsWith("Identity"))
+                    {
+                        // due to the conversion to an int it is no longer possible to determine
+                        // if the code is based on a one or two byte value. We should consider to
+                        // refactor that part of the code.
+                        // However, simple fonts with a predefined encoding are using one byte codes so that
+                        // we can limit the CMap mappings to one byte codes by passing the origin length
+                        return toUnicodeCMap.toUnicode(code, 1);
+                    }
+                }
+                return toUnicodeCMap.toUnicode(code);
             }
         }
 

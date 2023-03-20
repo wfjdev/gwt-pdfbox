@@ -33,7 +33,6 @@ import elemental2.dom.DomGlobal;
  */
 public class CMap
 {
-    
     private int wmode = 0;
     private String cmapName = null;
     private String cmapVersion = null;
@@ -176,15 +175,15 @@ public class CMap
                 bytes[byteCount] = (byte)in.read();
             }
         }
-        /*if (DomGlobal.isWarnEnabled())
-        {
+        //if (DomGlobal.console.isWarnEnabled())
+        //{
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < maxCodeLength; ++i)
             {
-                sb.append("0x%02X (%04o) ", bytes[i], bytes[i]));
+                sb.append("0x"+bytes[i]+"X ("+bytes[i]+"o)");
             }
             DomGlobal.console.warn("Invalid character code sequence " + sb + "in CMap " + cmapName);
-        }*/
+        //}
         // PDFBOX-4811 reposition to where we were after initial read
         if (in.markSupported())
         {

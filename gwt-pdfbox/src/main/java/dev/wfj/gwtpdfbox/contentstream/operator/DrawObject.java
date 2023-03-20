@@ -31,7 +31,6 @@ import dev.wfj.gwtpdfbox.pdmodel.graphics.PDXObject;
  */
 public class DrawObject extends OperatorProcessor
 {
-
     public DrawObject(PDFStreamEngine context)
     {
         super(context);
@@ -67,7 +66,7 @@ public class DrawObject extends OperatorProcessor
                 context.increaseLevel();
                 if (context.getLevel() > 50)
                 {
-                    DomGlobal.console.error("recursion is too deep, skipping form XObject");
+                    LOG.error("recursion is too deep, skipping form XObject");
                     return;
                 }
                 if (xobject instanceof PDTransparencyGroup)

@@ -52,7 +52,6 @@ import static dev.wfj.gwtpdfbox.pdmodel.font.UniUtil.getUniNameOfCodePoint;
  */
 public class PDType1CFont extends PDSimpleFont implements PDVectorFont
 {
-    
     private final Map<String, Float> glyphHeights = new HashMap<>();
     private final AffineTransform fontMatrixTransform;
     private final CFFType1Font cffFont; // embedded font
@@ -387,7 +386,7 @@ public class PDType1CFont extends PDSimpleFont implements PDVectorFont
         String name = getGlyphList().codePointToName(unicode);
         if (!encoding.contains(name))
         {
-            throw new IllegalArgumentException("U+"+unicode+"X is not available in this font's encoding:"+ encoding.getEncodingName());
+            throw new IllegalArgumentException("U+"+unicode+"X ('"+name+"') is not available in this font's encoding: "+encoding.getEncodingName());
         }
 
         String nameInFont = getNameInFont(name);
@@ -396,7 +395,7 @@ public class PDType1CFont extends PDSimpleFont implements PDVectorFont
 
         if (nameInFont.equals(".notdef") || !genericFont.hasGlyph(nameInFont))
         {
-            throw new IllegalArgumentException("No glyph for U+%04X in font");
+            throw new IllegalArgumentException("No glyph for U+"+unicode+"X in font "+getName());
         }
 
         int code = inverted.get(name);

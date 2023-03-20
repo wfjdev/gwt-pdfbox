@@ -39,10 +39,6 @@ import elemental2.dom.DomGlobal;
  */
 public class PDFStreamParser extends BaseParser
 {
-    /**
-     * Log instance.
-     */
-
     private static final int MAX_BIN_CHAR_TEST_LENGTH = 10;
     private final byte[] binCharTestArr = new byte[MAX_BIN_CHAR_TEST_LENGTH];
     

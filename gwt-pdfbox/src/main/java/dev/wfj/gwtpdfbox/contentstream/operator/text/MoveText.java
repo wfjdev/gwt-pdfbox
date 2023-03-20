@@ -35,7 +35,6 @@ import elemental2.dom.DomGlobal;
  */
 public class MoveText extends OperatorProcessor
 {
-
     public MoveText(PDFStreamEngine context)
     {
         super(context);

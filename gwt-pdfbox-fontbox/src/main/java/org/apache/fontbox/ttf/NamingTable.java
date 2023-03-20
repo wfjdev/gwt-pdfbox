@@ -83,24 +83,24 @@ public class NamingTable extends TTFTable
             int platform = nr.getPlatformId();
             int encoding = nr.getPlatformEncodingId();
             Charset charset = StandardCharsets.ISO_8859_1;
-            if (platform == NameRecord.PLATFORM_WINDOWS && (encoding == NameRecord.ENCODING_WINDOWS_SYMBOL || encoding == NameRecord.ENCODING_WINDOWS_UNICODE_BMP))
+            /*if (platform == NameRecord.PLATFORM_WINDOWS && (encoding == NameRecord.ENCODING_WINDOWS_SYMBOL || encoding == NameRecord.ENCODING_WINDOWS_UNICODE_BMP))
             {
-                charset = Charset.forName("UTF-16");
+                charset = StandardCharsets.UTF_8;
             }
             else if (platform == NameRecord.PLATFORM_UNICODE)
             {
-                charset = Charset.forName("UTF-16");
+                charset = StandardCharsets.UTF_8;
             }
-            /* else if (platform == NameRecord.PLATFORM_ISO)
+             else if (platform == NameRecord.PLATFORM_ISO)
             {
                 switch (encoding)
                 {
                     case 0:
-                        charset = Charset.forName("US-ASCII");
+                        charset = StandardCharsets.UTF_8;
                         break;
                     case 1:
                         //not sure is this is correct??
-                        charset = Charset.forName("UTF-16")BE;
+                        charset = StandardCharsets.UTF_8;
                         break;
                     case 2:
                         charset = StandardCharsets.ISO_8859_1;
@@ -108,7 +108,7 @@ public class NamingTable extends TTFTable
                     default:
                         break;
                 }
-            } */
+            }*/
             String string = data.readString(nr.getStringLength(), charset);
             nr.setString(string);
         }

@@ -36,7 +36,6 @@ import dev.wfj.gwtpdfbox.pdmodel.common.PDRectangle;
 import dev.wfj.gwtpdfbox.pdmodel.common.PDStream;
 import dev.wfj.gwtpdfbox.util.Matrix;
 import elemental2.dom.DomGlobal;
-import elemental2.dom.DomGlobal;
 
 /**
  * A Type 3 character procedure. This is a standalone PDF content stream.
@@ -45,7 +44,6 @@ import elemental2.dom.DomGlobal;
  */
 public final class PDType3CharProc implements COSObjectable, PDContentStream
 {
-    
     private final PDType3Font font;
     private final COSStream charStream;
 

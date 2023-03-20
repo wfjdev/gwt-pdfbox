@@ -16,6 +16,7 @@
  */
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,6 +35,11 @@ import org.apache.fontbox.ttf.OpenTypeFont;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.fontbox.type1.Type1Font;
+
+import com.googlecode.gwt.crypto.bouncycastle.util.encoders.Base64;
+import com.googlecode.gwt.crypto.bouncycastle.util.encoders.UrlBase64;
+
+import dev.wfj.gwtpdfbox.GwtFontResources;
 import dev.wfj.gwtpdfbox.io.RandomAccessReadBuffer;
 import dev.wfj.gwtpdfbox.pdmodel.font.Standard14Fonts.FontName;
 import elemental2.dom.DomGlobal;
@@ -48,7 +54,7 @@ final class FontMapperImpl implements FontMapper
     private static final FontCache fontCache = new FontCache(); // todo: static cache isn't ideal
     private FontProvider fontProvider;
     private Map<String, FontInfo> fontInfoByName;
-    private final TrueTypeFont lastResortFont = null;
+    private final TrueTypeFont lastResortFont;
 
     /** Map of PostScript name substitutes, in priority order. */
     private final Map<String, List<String>> substitutes = new HashMap<>();
@@ -108,33 +114,22 @@ final class FontMapperImpl implements FontMapper
                 addSubstitutes(baseName, new ArrayList<>(getSubstitutes(mappedName.getName())));
             }
         }
-
-        // -------------------------
-
-        //try
-        //{
-            /*String resourceName = "/dev.wfj.gwtpdfbox/resources/ttf/LiberationSans-Regular.ttf";
-            InputStream resourceAsStream = FontMapper.class.getResourceAsStream(resourceName);
-            if (resourceAsStream == null)
-            {
-                throw new IOException("resource '" + resourceName + "' not found");
-            }
-            RandomAccessReadBuffer randomAccessReadBuffer = new RandomAccessReadBuffer(
-                    resourceAsStream);
+        
+        byte[] decoded = Base64.decode(GwtFontResources.INSTANCE.liberationSansRegularTtf().getSafeUri().asString().split(",")[1]);
+        try(RandomAccessReadBuffer randomAccessReadBuffer = new RandomAccessReadBuffer(new ByteArrayInputStream(decoded))) {
             TTFParser ttfParser = new TTFParser();
-            lastResortFont = ttfParser.parse(randomAccessReadBuffer);*/
-            
-        //}
-        /* catch (IOException e)
+            lastResortFont = ttfParser.parse(randomAccessReadBuffer);
+        }
+        catch (IOException e)
         {
             throw new RuntimeException(e);
-        } */
+        }
     }
 
     // lazy thread safe singleton
     private static class DefaultFontProvider
     {
-        private static final FontProvider INSTANCE = null;// = new FileSystemFontProvider(fontCache);
+        private static final FontProvider INSTANCE = new EmbeddedFontProvider(fontCache);
     }
 
     /**
@@ -143,6 +138,7 @@ final class FontMapperImpl implements FontMapper
     public synchronized void setProvider(FontProvider fontProvider)
     {
         fontInfoByName = createFontInfoByName(fontProvider.getFontInfo());
+        ((EmbeddedFontProvider)fontProvider).addFont(lastResortFont);
         this.fontProvider = fontProvider;
     }
 
@@ -409,7 +405,10 @@ final class FontMapperImpl implements FontMapper
         }
         
         // make sure the font provider is initialized
-        //if (fontProvider == null) getProvider();
+        if (fontProvider == null)
+        {
+            getProvider();
+        }
 
         // first try to match the PostScript name
         FontInfo info = getFont(format, postScriptName);
@@ -469,7 +468,7 @@ final class FontMapperImpl implements FontMapper
         {
             //if (DomGlobal.console.isDebugEnabled())
             //{
-                //TODO: Fix: DomGlobal.console.debug\("getFont('%s','%s') returns %s", format, postScriptName, info));
+                DomGlobal.console.debug("getFont('"+postScriptName+"','"+postScriptName+"') returns "+info);
             //}
             return info;
         }
@@ -517,10 +516,10 @@ final class FontMapperImpl implements FontMapper
                 FontMatch bestMatch = queue.poll();
                 if (bestMatch != null)
                 {
-                    /*if (DomGlobal.console.isDebugEnabled())
-                    {
+                    //if (DomGlobal.console.isDebugEnabled())
+                    //{
                         DomGlobal.console.debug("Best match for '" + baseFont + "': " + bestMatch.info);
-                    }*/
+                    //}
                     FontBoxFont font = bestMatch.info.getFont();
                     if (font instanceof OpenTypeFont)
                     {

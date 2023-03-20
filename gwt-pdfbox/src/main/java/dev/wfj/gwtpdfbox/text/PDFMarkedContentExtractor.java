@@ -85,13 +85,13 @@ public class PDFMarkedContentExtractor extends LegacyPDFStreamEngine
     }
 
     /**
-     * This will determine of two floating point numbers are within a specified variance.
+     * This will determine of two doubleing point numbers are within a specified variance.
      *
      * @param first The first number to compare to.
      * @param second The second number to compare to.
      * @param variance The allowed variance.
      */
-    private boolean within( float first, float second, float variance )
+    private boolean within( double first, double second, double variance )
     {
         return second > first - variance && second < first + variance;
     }
@@ -148,8 +148,8 @@ public class PDFMarkedContentExtractor extends LegacyPDFStreamEngine
         {
             showCharacter = false;
             String textCharacter = text.getUnicode();
-            float textX = text.getX();
-            float textY = text.getY();
+            double textX = text.getX();
+            double textY = text.getY();
             List<TextPosition> sameTextCharacters =
                     this.characterListMapping.computeIfAbsent(textCharacter, k -> new ArrayList<>());
 
@@ -165,12 +165,12 @@ public class PDFMarkedContentExtractor extends LegacyPDFStreamEngine
             // character).
             //
             boolean suppressCharacter = false;
-            float tolerance = (text.getWidth()/textCharacter.length())/3.0f;
+            double tolerance = (text.getWidth()/textCharacter.length())/3.0f;
             for (TextPosition sameTextCharacter : sameTextCharacters)
             {
                 String charCharacter = sameTextCharacter.getUnicode();
-                float charX = sameTextCharacter.getX();
-                float charY = sameTextCharacter.getY();
+                double charX = sameTextCharacter.getX();
+                double charY = sameTextCharacter.getY();
                 //only want to suppress
                 if( charCharacter != null &&
                         //charCharacter.equals( textCharacter ) &&

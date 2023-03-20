@@ -49,8 +49,6 @@ import elemental2.dom.DomGlobal;
  */
 final class PDCIDFontType2Embedder extends TrueTypeEmbedder
 {
-
-    
     private final PDDocument document;
     private final PDType0Font parent;
     private final COSDictionary dict;

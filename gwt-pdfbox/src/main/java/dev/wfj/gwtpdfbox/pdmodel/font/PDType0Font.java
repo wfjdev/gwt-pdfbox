@@ -17,7 +17,7 @@
 package dev.wfj.gwtpdfbox.pdmodel.font;
 
 import java.awt.geom.GeneralPath;
-//import java.io.File;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
@@ -36,7 +36,6 @@ import dev.wfj.gwtpdfbox.cos.COSDictionary;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.io.RandomAccessRead;
 import dev.wfj.gwtpdfbox.io.RandomAccessReadBuffer;
-//import dev.wfj.gwtpdfbox.io.RandomAccessReadBufferedFile;
 import dev.wfj.gwtpdfbox.pdmodel.PDDocument;
 import dev.wfj.gwtpdfbox.util.Matrix;
 import dev.wfj.gwtpdfbox.util.Vector;
@@ -49,7 +48,6 @@ import elemental2.dom.DomGlobal;
  */
 public class PDType0Font extends PDFont implements PDVectorFont
 {
-    
     private final PDCIDFont descendantFont;
     private final Set<Integer> noUnicode = new HashSet<>(); 
     private final GsubData gsubData;
@@ -129,7 +127,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
             if (embedSubset)
             {
                 this.ttf = ttf;
-                //document.registerTrueTypeFontForClosing(ttf);
+                document.registerTrueTypeFontForClosing(ttf);
             }
             else
             {
@@ -148,10 +146,10 @@ public class PDType0Font extends PDFont implements PDVectorFont
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font file.
      */
-    /*public static PDType0Font load(PDDocument doc, File file) throws IOException
+    /* public static PDType0Font load(PDDocument doc, File file) throws IOException
     {
         return load(doc, new RandomAccessReadBufferedFile(file), true, false);
-    }*/
+    } */
 
     /**
      * Loads a TTF to be embedded and subset into a document as a Type 0 font. If you are loading a
@@ -225,10 +223,10 @@ public class PDType0Font extends PDFont implements PDVectorFont
      * @return A Type0 font with a CIDFontType2 descendant.
      * @throws IOException If there is an error reading the font file.
      */
-    /*public static PDType0Font loadVertical(PDDocument doc, File file) throws IOException
+    /* public static PDType0Font loadVertical(PDDocument doc, File file) throws IOException
     {
         return load(doc, new RandomAccessReadBufferedFile(file), true, true);
-    }*/
+    } */
 
     /**
      * Loads a TTF to be embedded into a document as a vertical Type 0 font.
@@ -323,7 +321,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
         {
             // predefined CMap
             COSName encodingName = (COSName) encoding;
-            //cMap = CMapManager.getPredefinedCMap(encodingName.getName());
+            cMap = CMapManager.getPredefinedCMap(encodingName.getName());
             isCMapPredefined = true;
         }
         else if (encoding != null)
@@ -388,7 +386,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
             }
             
             // try to find the corresponding Unicode (UC2) CMap
-            /*if (strName != null)
+            if (strName != null)
             {
                 try
                 {
@@ -400,7 +398,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
                 {
                     DomGlobal.console.warn("Could not get " + strName + " UC2 map for font " + getName(), ex);
                 }
-            }*/
+            }
         }
     }
 
@@ -581,7 +579,7 @@ public class PDType0Font extends PDFont implements PDVectorFont
             }
         }
 
-        if (/*DomGlobal.console.isWarnEnabled() && */!noUnicode.contains(code))
+        if (/* DomGlobal.console.isWarnEnabled() &&  */!noUnicode.contains(code))
         {
             // if no value has been produced, there is no way to obtain Unicode for the character.
             String cid = "CID+" + codeToCID(code);

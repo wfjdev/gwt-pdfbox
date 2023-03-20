@@ -16,6 +16,8 @@
  */
 package dev.wfj.gwtpdfbox.filter;
 
+import java.awt.Rectangle;
+
 /**
  * Options that may be passed to a Filter to request special handling when decoding the stream.
  * Filters may not honor some or all of the specified options, and so callers should check the
@@ -29,6 +31,7 @@ public class DecodeOptions
      */
     public static final DecodeOptions DEFAULT = new FinalDecodeOptions(true);
 
+    private Rectangle sourceRegion = null;
     private int subsamplingX = 1;
     private int subsamplingY = 1;
     private int subsamplingOffsetX = 0;
@@ -43,7 +46,30 @@ public class DecodeOptions
         // this constructor is intentionally left empty
     }
 
-  
+    /**
+     * Constructs an instance specifying the region of the image that should be decoded. The actual
+     * region will be clipped to the dimensions of the image.
+     *
+     * @param sourceRegion Region of the source image that should be decoded
+     */
+    public DecodeOptions(Rectangle sourceRegion)
+    {
+        this.sourceRegion = sourceRegion;
+    }
+
+    /**
+     * Constructs an instance specifying the region of the image that should be decoded. The actual
+     * region will be clipped to the dimensions of the image.
+     *
+     * @param x x-coordinate of the top-left corner of the region to be decoded
+     * @param y y-coordinate of the top-left corner of the region to be decoded
+     * @param width Width of the region to be decoded
+     * @param height Height of the region to be decoded
+     */
+    public DecodeOptions(int x, int y, int width, int height)
+    {
+        this(new Rectangle(x, y, width, height));
+    }
 
     /**
      * Constructs an instance specifying the image should be decoded using subsampling. The
@@ -56,6 +82,30 @@ public class DecodeOptions
     {
         subsamplingX = subsampling;
         subsamplingY = subsampling;
+    }
+
+    /**
+     * When decoding an image, the part of the image that should be decoded, or null if the entire
+     * image is needed.
+     *
+     * @return The source region to decode, or null if the entire image should be decoded
+     */
+    public Rectangle getSourceRegion()
+    {
+        return sourceRegion;
+    }
+
+    /**
+     * Sets the region of the source image that should be decoded. The region will be clipped to the
+     * dimensions of the source image. Setting this value to null will result in the entire image
+     * being decoded.
+     *
+     * @param sourceRegion The source region to decode, or null if the entire image should be
+     * decoded.
+     */
+    public void setSourceRegion(Rectangle sourceRegion)
+    {
+        this.sourceRegion = sourceRegion;
     }
 
     /**
@@ -174,7 +224,13 @@ public class DecodeOptions
         {
             super.setFilterSubsampled(filterSubsampled);
         }
-        
+
+        @Override
+        public void setSourceRegion(Rectangle sourceRegion)
+        {
+            throw new UnsupportedOperationException("This instance may not be modified.");
+        }
+
         @Override
         public void setSubsamplingX(int ssX)
         {

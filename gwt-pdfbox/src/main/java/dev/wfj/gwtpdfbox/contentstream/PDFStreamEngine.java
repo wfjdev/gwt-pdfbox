@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.googlecode.gwt.crypto.bouncycastle.util.encoders.Base64;
+
 import dev.wfj.gwtpdfbox.contentstream.operator.MissingOperandException;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.EmptyGraphicsStackException;
 import dev.wfj.gwtpdfbox.cos.COSArray;
@@ -710,6 +712,7 @@ public abstract class PDFStreamEngine
         {
             DomGlobal.console.warn("No current font, will use default");
             font = getDefaultFont();
+            if(font == null) DomGlobal.console.warn("Default font is null");
         }
 
         float fontSize = textState.getFontSize();

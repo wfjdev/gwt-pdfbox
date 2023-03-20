@@ -39,7 +39,7 @@ public final class FilterFactory
     private FilterFactory()
     {
         Filter flate = new FlateFilter();
-        //Filter dct = new DCTFilter();
+        Filter dct = new DCTFilter();
         //Filter ccittFax = new CCITTFaxFilter();
         //Filter lzw = new LZWFilter();
         Filter asciiHex = new ASCIIHexFilter();
@@ -51,8 +51,8 @@ public final class FilterFactory
 
         filters.put(COSName.FLATE_DECODE, flate);
         filters.put(COSName.FLATE_DECODE_ABBREVIATION, flate);
-        //filters.put(COSName.DCT_DECODE, dct);
-        //filters.put(COSName.DCT_DECODE_ABBREVIATION, dct);
+        filters.put(COSName.DCT_DECODE, dct);
+        filters.put(COSName.DCT_DECODE_ABBREVIATION, dct);
         //filters.put(COSName.CCITTFAX_DECODE, ccittFax);
         //filters.put(COSName.CCITTFAX_DECODE_ABBREVIATION, ccittFax);
         //filters.put(COSName.LZW_DECODE, lzw);

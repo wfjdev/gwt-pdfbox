@@ -29,6 +29,8 @@ import dev.wfj.gwtpdfbox.contentstream.operator.OperatorProcessor;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.cos.COSNumber;
+import dev.wfj.gwtpdfbox.pdmodel.font.PDFont;
+import elemental2.dom.DomGlobal;
 
 /**
  * Tf: Set text font and size.
@@ -37,7 +39,6 @@ import dev.wfj.gwtpdfbox.cos.COSNumber;
  */
 public class SetFontAndSize extends OperatorProcessor
 {
-
     public SetFontAndSize(PDFStreamEngine context)
     {
         super(context);
@@ -65,12 +66,12 @@ public class SetFontAndSize extends OperatorProcessor
         float fontSize = ((COSNumber) base1).floatValue();
         PDFStreamEngine context = getContext();
         context.getGraphicsState().getTextState().setFontSize(fontSize);
-        /*PDFont font = context.getResources().getFont(fontName);
+        PDFont font = context.getResources().getFont(fontName);
         if (font == null)
         {
             DomGlobal.console.warn("font '" + fontName.getName() + "' not found in resources");
-        }*/
-       // context.getGraphicsState().getTextState().setFont(font);
+        }
+        context.getGraphicsState().getTextState().setFont(font);
     }
 
     @Override

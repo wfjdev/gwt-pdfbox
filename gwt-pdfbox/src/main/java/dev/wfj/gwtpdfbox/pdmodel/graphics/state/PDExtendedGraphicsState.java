@@ -25,6 +25,8 @@ import dev.wfj.gwtpdfbox.cos.COSFloat;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.cos.COSNumber;
 import dev.wfj.gwtpdfbox.pdmodel.common.COSObjectable;
+import dev.wfj.gwtpdfbox.pdmodel.graphics.PDFontSetting;
+import elemental2.dom.DomGlobal;
 
 /**
  * An extended graphics state dictionary.
@@ -102,7 +104,7 @@ public class PDExtendedGraphicsState implements COSObjectable
             {
                 gs.setNonStrokingOverprint(getNonStrokingOverprintControl());
             }
-            /*else if( key.equals( COSName.FONT ) )
+            else if( key.equals( COSName.FONT ) )
             {
                 PDFontSetting setting = getFontSetting();
                 if (setting != null)
@@ -110,7 +112,7 @@ public class PDExtendedGraphicsState implements COSObjectable
                     gs.getTextState().setFont( setting.getFont() );
                     gs.getTextState().setFontSize( setting.getFontSize() );
                 }
-            }*/
+            }
             else if( key.equals( COSName.FL ) )
             {
                 gs.setFlatness( defaultIfNull( getFlatnessTolerance(), 1.0f ) );
@@ -416,21 +418,21 @@ public class PDExtendedGraphicsState implements COSObjectable
      *
      * @return The font setting.
      */
-    /*public PDFontSetting getFontSetting()
+    public PDFontSetting getFontSetting()
     {
         COSArray font = dict.getCOSArray(COSName.FONT);
         return font != null ? new PDFontSetting(font) : null;
-    }*/
+    }
 
     /**
      * This will set the font setting for this graphics state.
      *
      * @param fs The new font setting.
      */
-    /*public void setFontSetting( PDFontSetting fs )
+    public void setFontSetting( PDFontSetting fs )
     {
         dict.setItem(COSName.FONT, fs);
-    }*/
+    }
 
     /**
      * This will get the flatness tolerance.

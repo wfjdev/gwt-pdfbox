@@ -2,6 +2,7 @@
 <!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.8.0//EN"
     "http://gwtproject.org/doctype/2.8.2/gwt-module.dtd">
 <module>
+  <inherits name="com.googlecode.gwt.crypto.Crypto"/>
   <inherits name="com.google.gwt.resources.Resources" />
   <inherits name="dev.wfj.gwtnio.GwtNio" />
   <inherits name='dev.wfj.gwtpdfbox.fontbox.GwtPdfBoxFontBox'/>

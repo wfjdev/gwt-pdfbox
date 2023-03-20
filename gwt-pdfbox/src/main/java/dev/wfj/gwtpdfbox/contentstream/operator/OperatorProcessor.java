@@ -17,6 +17,10 @@
 package dev.wfj.gwtpdfbox.contentstream.operator;
 
 import dev.wfj.gwtpdfbox.cos.COSBase;
+import dev.wfj.gwtpdfbox.cos.COSFloat;
+import dev.wfj.gwtpdfbox.cos.COSInteger;
+import dev.wfj.gwtpdfbox.cos.COSNumber;
+import elemental2.dom.DomGlobal;
 import dev.wfj.gwtpdfbox.contentstream.PDFStreamEngine;
 
 import java.util.List;
@@ -76,6 +80,12 @@ public abstract class OperatorProcessor
      */
     public boolean checkArrayTypesClass(List<COSBase> operands, Class<?> clazz)
     {
-        return operands.stream().allMatch(o -> o.getClass() == clazz);
+        return operands.stream().allMatch(o -> {
+            if(clazz == COSNumber.class) {
+                if(o instanceof COSInteger) return true;
+                if(o instanceof COSFloat) return true;
+            }
+            return false;
+        });
     }
 }

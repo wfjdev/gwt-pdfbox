@@ -19,12 +19,37 @@ package dev.wfj.gwtpdfbox.contentstream;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.pdmodel.PDPage;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.AppendRectangleToPath;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.ClipEvenOddRule;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.ClipNonZeroRule;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.CloseAndStrokePath;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.CloseFillEvenOddAndStrokePath;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.CloseFillNonZeroAndStrokePath;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.ClosePath;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.CurveTo;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.CurveToReplicateFinalPoint;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.CurveToReplicateInitialPoint;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.DrawObject;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.EndPath;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.FillEvenOddAndStrokePath;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.FillEvenOddRule;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.FillNonZeroAndStrokePath;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.FillNonZeroRule;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.LegacyFillNonZeroRule;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.LineTo;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.MoveTo;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.ShadingFill;
+import dev.wfj.gwtpdfbox.contentstream.operator.graphics.StrokePath;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.Concatenate;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.Restore;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.Save;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.SetFlatness;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.SetGraphicsStateParameters;
+import dev.wfj.gwtpdfbox.contentstream.operator.state.SetLineCapStyle;
+import dev.wfj.gwtpdfbox.contentstream.operator.state.SetLineDashPattern;
+import dev.wfj.gwtpdfbox.contentstream.operator.state.SetLineJoinStyle;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.SetLineMiterLimit;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.SetLineWidth;
 import dev.wfj.gwtpdfbox.contentstream.operator.state.SetMatrix;
@@ -66,18 +91,48 @@ public abstract class PDFGraphicsStreamEngine extends PDFStreamEngine
     {
         this.page = page;
 
+        addOperator(new CloseFillNonZeroAndStrokePath(this));
+        addOperator(new FillNonZeroAndStrokePath(this));
+        addOperator(new CloseFillEvenOddAndStrokePath(this));
+        addOperator(new FillEvenOddAndStrokePath(this));
+        //addOperator(new BeginInlineImage(this));
         addOperator(new BeginText(this));
+        addOperator(new CurveTo(this));
         addOperator(new Concatenate(this));
-        //addOperator(new SetLineDashPattern(this));
+        ////addOperator(new SetStrokingColorSpace(this));
+        //addOperator(new SetNonStrokingColorSpace(this));
+        addOperator(new SetLineDashPattern(this));
+        addOperator(new DrawObject(this)); // special graphics version
         addOperator(new EndText(this));
+        addOperator(new FillNonZeroRule(this));
+        addOperator(new LegacyFillNonZeroRule(this));
+        addOperator(new FillEvenOddRule(this));
+        //addOperator(new SetStrokingDeviceGrayColor(this));
+        //addOperator(new SetNonStrokingDeviceGrayColor(this));
         addOperator(new SetGraphicsStateParameters(this));
+        addOperator(new ClosePath(this));
         addOperator(new SetFlatness(this));
-        //addOperator(new SetLineJoinStyle(this));
-        //addOperator(new SetLineCapStyle(this));
+        addOperator(new SetLineJoinStyle(this));
+        addOperator(new SetLineCapStyle(this));
+        //addOperator(new SetStrokingDeviceCMYKColor(this));
+        //addOperator(new SetNonStrokingDeviceCMYKColor(this));
+        addOperator(new LineTo(this));
+        addOperator(new MoveTo(this));
         addOperator(new SetLineMiterLimit(this));
+        addOperator(new EndPath(this));
         addOperator(new Save(this));
         addOperator(new Restore(this));
+        addOperator(new AppendRectangleToPath(this));
+        //addOperator(new SetStrokingDeviceRGBColor(this));
+        //addOperator(new SetNonStrokingDeviceRGBColor(this));
         addOperator(new SetRenderingIntent(this));
+        addOperator(new CloseAndStrokePath(this));
+        addOperator(new StrokePath(this));
+        //addOperator(new SetStrokingColor(this));
+        //addOperator(new SetNonStrokingColor(this));
+        //addOperator(new SetStrokingColorN(this));
+        //addOperator(new SetNonStrokingColorN(this));
+        addOperator(new ShadingFill(this));
         addOperator(new NextLine(this));
         addOperator(new SetCharSpacing(this));
         addOperator(new MoveText(this));
@@ -91,9 +146,16 @@ public abstract class PDFGraphicsStreamEngine extends PDFStreamEngine
         addOperator(new SetTextRise(this));
         addOperator(new SetWordSpacing(this));
         addOperator(new SetTextHorizontalScaling(this));
+        addOperator(new CurveToReplicateInitialPoint(this));
         addOperator(new SetLineWidth(this));
+        addOperator(new ClipNonZeroRule(this));
+        addOperator(new ClipEvenOddRule(this));
+        addOperator(new CurveToReplicateFinalPoint(this));
         addOperator(new ShowTextLine(this));
         addOperator(new ShowTextLineAndSpace(this));
+        //addOperator(new BeginMarkedContentSequence(this));
+        //addOperator(new BeginMarkedContentSequenceWithProperties(this));
+        //addOperator(new EndMarkedContentSequence(this));
     }
 
     /**
@@ -116,8 +178,8 @@ public abstract class PDFGraphicsStreamEngine extends PDFStreamEngine
      * 
      * @throws IOException if the rectangle could not be appended
      */
-    /*public abstract void appendRectangle(Point2D p0, Point2D p1,
-                                         Point2D p2, Point2D p3) throws IOException;*/
+    public abstract void appendRectangle(Point2D p0, Point2D p1,
+                                         Point2D p2, Point2D p3) throws IOException;
 
     /**
      * Draw the image.
@@ -181,7 +243,7 @@ public abstract class PDFGraphicsStreamEngine extends PDFStreamEngine
      * 
      * @throws IOException if the something went wrong when providing the current point
      */
-    //public abstract Point2D getCurrentPoint() throws IOException;
+    public abstract Point2D getCurrentPoint() throws IOException;
 
     /**
      * Closes the current path.

@@ -22,6 +22,7 @@ import java.util.List;
 import dev.wfj.gwtpdfbox.cos.COSBase;
 import dev.wfj.gwtpdfbox.cos.COSName;
 import dev.wfj.gwtpdfbox.pdmodel.graphics.state.PDExtendedGraphicsState;
+import elemental2.dom.DomGlobal;
 import dev.wfj.gwtpdfbox.contentstream.operator.Operator;
 import dev.wfj.gwtpdfbox.contentstream.operator.OperatorName;
 import dev.wfj.gwtpdfbox.contentstream.operator.OperatorProcessor;
@@ -35,7 +36,6 @@ import dev.wfj.gwtpdfbox.contentstream.operator.MissingOperandException;
  */
 public class SetGraphicsStateParameters extends OperatorProcessor
 {
-
     public SetGraphicsStateParameters(PDFStreamEngine context)
     {
         super(context);
@@ -57,13 +57,13 @@ public class SetGraphicsStateParameters extends OperatorProcessor
         // set parameters from graphics state parameter dictionary
         COSName graphicsName = (COSName) base0;
         PDFStreamEngine context = getContext();
-        /*PDExtendedGraphicsState gs = context.getResources().getExtGState(graphicsName);
+        PDExtendedGraphicsState gs = context.getResources().getExtGState(graphicsName);
         if (gs == null)
         {
             DomGlobal.console.error("name for 'gs' operator not found in resources: /" + graphicsName.getName());
             return;
         }
-        gs.copyIntoGraphicsState( context.getGraphicsState() );*/
+        gs.copyIntoGraphicsState( context.getGraphicsState() );
     }
 
     @Override

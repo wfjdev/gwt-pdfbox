@@ -39,7 +39,7 @@ import dev.wfj.gwtpdfbox.io.RandomAccessRead;
 import elemental2.dom.DomGlobal;
 
 /**
- * This class is used to contain parsing DomGlobal.consoleic that will be used by both the
+ * This class is used to contain parsing logic that will be used by both the
  * PDFParser and the COSStreamParser.
  *
  * @author Ben Litchfield
@@ -53,10 +53,6 @@ public abstract class BaseParser
     static final int MAX_LENGTH_LONG = Long.toString(Long.MAX_VALUE).length();
 
     //private final CharsetDecoder utf8Decoder = StandardCharsets.UTF_8.newDecoder();
-
-    /**
-     * DomGlobal.console instance.
-     */
 
     protected static final int E = 'e';
     protected static final int N = 'n';

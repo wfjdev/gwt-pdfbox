@@ -205,17 +205,17 @@ abstract class TTFDataStream implements Closeable
      * @return An signed short.
      * @throws IOException If there is an error reading the data.
      */
-    /* public Calendar readInternationalDate() throws IOException
+    public void readInternationalDate() throws IOException
     {
         long secondsSince1904 = readLong();
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.set(1904, 0, 1, 0, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        long millisFor1904 = cal.getTimeInMillis();
-        millisFor1904 += (secondsSince1904 * 1000);
-        cal.setTimeInMillis(millisFor1904);
-        return cal;
-    } */
+        //Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        //cal.set(1904, 0, 1, 0, 0, 0);
+        //cal.set(Calendar.MILLISECOND, 0);
+        //long millisFor1904 = cal.getTimeInMillis();
+        //millisFor1904 += (secondsSince1904 * 1000);
+        //cal.setTimeInMillis(millisFor1904);
+        //return cal;
+    }
 
     /**
      * Reads a tag, an array of four uint8s used to identify a script, language system, feature,
